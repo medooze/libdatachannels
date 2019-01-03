@@ -98,6 +98,13 @@ size_t InitiationChunk::Serialize(BufferWritter& writter) const
 		writter.Set(unknownParameter.second);
 		writter.PadTo(4);
 	}
+	if (forwardTSNSupported)
+	{
+		//Write it
+		writter.Set2(Parameter::ForwardTSNSupported);
+		writter.Set2(4);
+		writter.PadTo(4);
+	}
 	
 	//Get length
 	size_t length = writter.GetLength();
@@ -135,6 +142,7 @@ Chunk::shared InitiationChunk::Parse(BufferReader& reader)
 	init->numberOfOutboundStreams		= reader.Get2();
 	init->numberOfInboundStreams		= reader.Get2();
 	init->initialTransmissionSequenceNumber = reader.Get4();
+	init->forwardTSNSupported		= false;
 	
 	//Read parameters
 	while (reader.GetLeft()>4)
@@ -174,6 +182,9 @@ Chunk::shared InitiationChunk::Parse(BufferReader& reader)
 			case Parameter::CookiePreservative:
 				if (!paramReader.Assert(8)) return nullptr;
 				init->suggestedCookieLifeSpanIncrement = paramReader.Get8();
+				break;
+			case Parameter::ForwardTSNSupported:
+				init->forwardTSNSupported = true;
 				break;
 			default:
 				//Unkonwn

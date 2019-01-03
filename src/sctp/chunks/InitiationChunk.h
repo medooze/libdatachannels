@@ -52,6 +52,7 @@ public:
 	std::vector<uint16_t> supportedAddressTypes;			// Supported Address Types (12)
 	std::vector<uint8_t> supportedExtensions;			// Supported Extensions  (0x8008) rfc5061#page-13
 	std::vector<std::pair<uint8_t,Buffer>> unknownParameters;
+	bool forwardTSNSupported = true;				//  Forward-TSN-Supported 49152 (0xC000) rfc3758
 };
 	
 }; // namespace sctp

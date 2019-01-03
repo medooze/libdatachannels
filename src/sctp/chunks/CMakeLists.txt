@@ -14,6 +14,7 @@ target_sources(libdatachannels PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/InitiationChunk.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/ReConfigChunk.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/ShutdownAssociationChunk.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/ForwardCumulativeTSNChunk.cpp
 )
 
 

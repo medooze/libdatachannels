@@ -44,12 +44,14 @@ public:
 	uint32_t initialTransmissionSequenceNumber = 0;
 	Buffer stateCookie;
 	
-	std::vector<std::array<uint8_t, 8>>   ipV4Addresses;		// IPv4 Address Parameter (5)
-	std::vector<std::array<uint8_t, 120>> ipV46ddresses;		// IPv6 Address Parameter (6)
+	std::vector<std::array<uint8_t, 8>>  ipV4Addresses;		// IPv4 Address Parameter (5)
+	std::vector<std::array<uint8_t, 20>> ipV6Addresses;		// IPv6 Address Parameter (6)
 	std::optional<std::string> hostName;				// Host Name Address (11)
 	std::vector<Buffer> unrecognizedParameters;			// Unrecognized Parameter (8)
-	
+	std::vector<std::pair<uint8_t,Buffer>> unknownParameters;
 	std::vector<uint8_t> supportedExtensions;			// Supported Extensions  (0x8008) rfc5061#page-13
+	
+	bool forwardTSNSupported = true;				//  Forward-TSN-Supported 49152 (0xC000) rfc3758
 };	
 	
 }; // namespace sctp

@@ -45,6 +45,7 @@ public:
 		RE_CONFIG		= 130, // Re-configuration Chunk (RE-CONFIG) rfc6525
 		// 191        - reserved for IETF-defined Chunk Extensions
 		// 192 to 254 - available
+		FORWARD_CUMULATIVE_TSN	= 192,
 		// 255        - reserved for IETF-defined Chunk Extensions
 	};
 	
@@ -65,6 +66,7 @@ public:
 		AddOutgoingStreamsRequestParameter	= 17,
 		AddIncomingStreamsRequestParameter	= 18,
 		SupportedExtensions			= 0x8008, //rfc5061
+		ForwardTSNSupported			= 49152,  //rfc3758 (0xC000)
 	};
 	
 	Chunk(uint8_t type)
@@ -116,6 +118,7 @@ public:
 #include "chunks/InitiationChunk.h"
 #include "chunks/ReConfigChunk.h"
 #include "chunks/ShutdownAssociationChunk.h"
+#include "chunks/ForwardCumulativeTSNChunk.h"
 
 
 

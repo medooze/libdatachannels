@@ -39,6 +39,17 @@ public:
 		other.size = 0;
 	}
 	
+	Buffer& operator=(Buffer&& other) 
+	{
+		this->capacity = other.capacity;
+		this->buffer = other.buffer;
+		this->size = other.size;
+		other.buffer = nullptr;
+		other.capacity = 0;
+		other.size = 0;
+		return *this; 
+	}
+	
 	~Buffer()
 	{
 		if (buffer) free(buffer);
