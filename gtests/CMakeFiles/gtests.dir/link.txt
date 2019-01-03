@@ -1,0 +1,1 @@
+/usr/bin/g++  -g3 -gdwarf-2  -rdynamic CMakeFiles/gtests.dir/TestSuite.cpp.o  -o gtests ../src/liblibdatachannels.a 
