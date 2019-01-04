@@ -3,10 +3,12 @@
 #include "datachannels.h"
 #include "sctp/Association.h"
 
-namespace datachannel
+namespace datachannels
+{
+namespace impl
 {
 
-class Endpoint : public DatachannelEndpoint
+class Endpoint : public datachannels::Endpoint
 {
 public:
 	Endpoint(TimeService& timeService,const Options& options);
@@ -21,18 +23,12 @@ public:
 	virtual uint16_t GetLocalPort() const override;
 	virtual uint16_t GetRemotePort() const override;
 	virtual Setup	 GetSetup() const override;
-	
-	
-	//DTLS tranport
-	virtual size_t ReadPacket(uint8_t *data, uint32_t size) override;
-	virtual size_t WritePacket(uint8_t *data, uint32_t size) override; 
-	
-	virtual void OnPendingData(std::function<void(void)> callback) override;
-	
+	virtual datachannels::Transport& GetTransport() override;
 private:
 	sctp::Association association;
 	Setup setup;
 };
-	
-};
+
+}; //namespace impl
+}; //namespace datachannels
 #endif 

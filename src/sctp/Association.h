@@ -11,7 +11,7 @@ namespace sctp
 {
 
 	
-class Association
+class Association : public datachannels::Transport
 {
 public:
 	enum State
@@ -27,7 +27,7 @@ public:
 		ShutDownAckSent
 	};
 public:
-	Association(TimeService& timeService);
+	Association(datachannels::TimeService& timeService);
 	
 	bool Associate();
 	bool Shutdown();
@@ -40,10 +40,10 @@ public:
 	uint16_t GetLocalPort() const 		{ return localPort;	}
 	uint16_t GetRemotePort() const		{ return remotePort;	}
 	
-	size_t ReadPacket(uint8_t *data, uint32_t size); 
-	size_t WritePacket(uint8_t *data, uint32_t size); 
+	virtual size_t ReadPacket(uint8_t *data, uint32_t size) override;
+	virtual size_t WritePacket(uint8_t *data, uint32_t size) override;
 	
-	void OnPendingData(std::function<void(void)> callback)
+	virtual void OnPendingData(std::function<void(void)> callback) override
 	{
 		onPendingData = callback;
 	}
@@ -54,7 +54,7 @@ private:
 private:
 	State state = State::Closed;
 	std::list<Chunk::shared> queue;
-	TimeService& timeService;
+	datachannels::TimeService& timeService;
 	
 	uint16_t localPort = 0;
 	uint16_t remotePort = 0;
@@ -62,8 +62,8 @@ private:
 	uint32_t localVerificationTag = 0;
 	uint32_t remoteVerificationTag = 0;
 	uint32_t initRetransmissions = 0;
-	TimeService::Timer::shared initTimer;
-	TimeService::Timer::shared cookieEchoTimer;
+	datachannels::Timer::shared initTimer;
+	datachannels::Timer::shared cookieEchoTimer;
 	
 	bool pendingData = false;
 	std::function<void(void)> onPendingData;

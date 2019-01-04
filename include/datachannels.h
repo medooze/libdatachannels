@@ -6,17 +6,21 @@
 #include <string>
 #include <functional>
 
-class TimeService
+namespace datachannels
+{
+
+class Timer
 {
 public:
-	class Timer
-	{
-	public:
-		using shared = std::shared_ptr<Timer>;
-	public:
-		virtual void Cancel() = 0;
-		virtual void Retry(const std::chrono::milliseconds& ms) = 0;
-	};
+	using shared = std::shared_ptr<Timer>;
+public:
+	virtual ~Timer() = default;
+	virtual void Cancel() = 0;
+	virtual void Retry(const std::chrono::milliseconds& ms) = 0;
+};
+	
+class TimeService
+{
 public:
 	uint64_t GetNow();
 	Timer::shared CreateTimer(const std::chrono::milliseconds& ms,std::function<void(void) > timeout);
@@ -25,7 +29,11 @@ public:
 class Datachannel
 {
 public:
-	// Type definitions
+	enum MessageType
+	{
+		UTF8,
+		Binary
+	};
 	
 	struct Options
 	{
@@ -34,32 +42,28 @@ public:
 
 	using shared = std::shared_ptr<Datachannel>;
 public:
-	// Member methods
-	
-	virtual bool Send(const std::wstring& msg)  = 0;
-	virtual bool Send(const uint8_t* data, const uint64_t size)  = 0;
-	
-	// Stream mode
-	virtual bool StartMessage()  = 0;
-	virtual bool SendMessageData(const uint8_t* data, const uint64_t size)  = 0;
-	virtual bool EndMessage()  = 0;
+	virtual ~Datachannel() = default;
+	virtual bool Send(MessageType type, const uint8_t* data, const uint64_t size)  = 0;
+	virtual bool Close() = 0;
 	
 	// Event handlers
-	virtual void onMessage(const std::function<void(const std::wstring&)>& callback);
-	virtual void onMessage(const std::function<void(const uint8_t*,uint64_t)>& callback);
+	virtual void onMessage(const std::function<void(MessageType, const uint8_t*,uint64_t)>& callback) = 0;
 	
-	virtual void onMessageStart(const std::function<void(void)>& callback);
-	virtual void onMessageData(const std::function<void(const uint8_t*,uint64_t)>& callback);
-	virtual void onMessageEnd(const std::function<void(void)>& callback);
-		
-	virtual bool Close();
 };
 
-class DatachannelEndpoint
+class Transport
 {
 public:
-	// Type definitions
+	virtual ~Transport() = default;
+	virtual size_t ReadPacket(uint8_t *data, uint32_t size) = 0;
+	virtual size_t WritePacket(uint8_t *data, uint32_t size) = 0; 
 	
+	virtual void OnPendingData(std::function<void(void)> callback) = 0;
+};
+
+class Endpoint
+{
+public:
 	enum Setup
 	{
 		Client,
@@ -68,33 +72,31 @@ public:
 	
 	struct Options
 	{
-		Setup setup;
+		uint16_t localPort	= 5000;
+		Setup setup		= Server;
 	};
 	
-	using shared = std::shared_ptr<DatachannelEndpoint>;
+	using shared = std::shared_ptr<Endpoint>;
 public:
 	// Static methods
 	
 	// Create new datachannel endpoint
 	//	options.setup : Client/Server	
-	static DatachannelEndpoint::shared Create(TimeService& timeService, const Options& options) ;
+	static Endpoint::shared Create(TimeService& timeService, const Options& options) ;
 	
 public:
-	// Type definitions
+	virtual ~Endpoint() = default;
 	virtual bool Start(uint16_t remotePort)  = 0;
 	virtual Datachannel::shared CreateDatachannel(const Datachannel::Options& options)  = 0;
 	virtual bool Close()  = 0;
 	
 	// Getters
-	virtual uint16_t GetLocalPort() const = 0;
-	virtual uint16_t GetRemotePort() const = 0;
-	virtual Setup	 GetSetup() const = 0;
-	
-	//DTLS tranport
-	virtual size_t ReadPacket(uint8_t *data, uint32_t size) = 0;
-	virtual size_t WritePacket(uint8_t *data, uint32_t size) = 0; 
-	
-	virtual void OnPendingData(std::function<void(void)> callback) = 0;
+	virtual uint16_t   GetLocalPort() const = 0;
+	virtual uint16_t   GetRemotePort() const = 0;
+	virtual Setup	   GetSetup() const = 0;
+	virtual Transport& GetTransport() = 0;
 };
+
+}; //namespace
 
 #endif

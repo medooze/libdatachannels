@@ -16,7 +16,7 @@ std::uniform_int_distribution<unsigned long> dis{1, 4294967295};
 
 #define MaxInitRetransmits 10
 
-Association::Association(TimeService& timeService) :
+Association::Association(datachannels::TimeService& timeService) :
 	timeService(timeService)
 {
 	

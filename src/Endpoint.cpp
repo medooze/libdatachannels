@@ -1,19 +1,21 @@
 #include "Endpoint.h"
 #include <memory>
 
-DatachannelEndpoint::shared DatachannelEndpoint::Create(TimeService& timeService, const Options& options) 
+namespace datachannels
+{
+	
+Endpoint::shared Endpoint::Create(TimeService& timeService, const Options& options) 
 {
 	//Create endpoint
-	auto endpoint = std::make_shared<datachannel::Endpoint>(timeService,options);
+	auto endpoint = std::make_shared<datachannels::impl::Endpoint>(timeService,options);
 	//Cast and return
-	return std::static_pointer_cast<DatachannelEndpoint>(endpoint);
+	return std::static_pointer_cast<Endpoint>(endpoint);
 }
 
-
-namespace datachannel
+namespace impl
 {
 
-Endpoint::Endpoint(TimeService& timeService, const Options& options) :
+Endpoint::Endpoint(datachannels::TimeService& timeService, const Options& options) :
 	association(timeService),
 	setup(options.setup)
 {
@@ -66,5 +68,11 @@ Endpoint::Setup Endpoint::GetSetup() const
 {
 	return setup;
 }
+
+datachannels::Transport& Endpoint::GetTransport()
+{
+	return association;
+}
 	
+}; // namespace impl
 }; // namespace datachannel
