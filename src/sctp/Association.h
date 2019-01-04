@@ -4,12 +4,12 @@
 
 #include "datachannels.h"
 #include "sctp/PacketHeader.h"
+#include "sctp/Stream.h"
 #include "BufferWritter.h"
 #include "BufferReader.h"
 
 namespace sctp
 {
-
 	
 class Association : public datachannels::Transport
 {
@@ -67,6 +67,8 @@ private:
 	
 	bool pendingData = false;
 	std::function<void(void)> onPendingData;
+	
+	std::map<uint16_t,Stream::shared> streams;
 };
 
 }
