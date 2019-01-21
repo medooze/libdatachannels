@@ -1,6 +1,6 @@
-#ifndef DATACHANNEL_IMPL_H_
-#define DATACHANNEL_IMPL_H_
-#include "datachannels.h"
+#ifndef DATACHANNEL_IMPL_DATACHANNEL_H_
+#define DATACHANNEL_IMPL_DATACHANNEL_H_
+#include "Datachannels.h"
 
 #include "sctp/Stream.h"
 

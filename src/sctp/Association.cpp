@@ -69,14 +69,14 @@ bool Association::Associate()
 	init->supportedExtensions.push_back(Chunk::Type::RE_CONFIG);
 		
 	//Set timer
-	initTimer = timeService.CreateTimer(100ms,[&](){
+	initTimer = timeService.CreateTimer(100ms,[&](...){
 		//Retransmit init chunk
 		if (initRetransmissions++<MaxInitRetransmits)
 		{
 			//Enquee
 			Enqueue(std::static_pointer_cast<Chunk>(init));
 			//Retry again
-			initTimer->Retry(100ms);
+			initTimer->Again(100ms);
 		} else {
 			//Close
 			SetState(State::Closed);
@@ -326,7 +326,7 @@ void Association::Process(const Chunk::shared& chunk)
 					initRetransmissions = 0;
 					
 					//Set timer
-					cookieEchoTimer = timeService.CreateTimer(100ms,[&](){
+					cookieEchoTimer = timeService.CreateTimer(100ms,[&](...){
 						
 						//3)  If the T1-cookie timer expires, the endpoint MUST retransmit
 						//    COOKIE ECHO and restart the T1-cookie timer without changing
@@ -338,7 +338,7 @@ void Association::Process(const Chunk::shared& chunk)
 							//Retransmit
 							Enqueue(std::static_pointer_cast<Chunk>(cookieEcho));
 							//Retry again
-							initTimer->Retry(100ms);
+							initTimer->Again(100ms);
 						} else {
 							//Close
 							SetState(State::Closed);

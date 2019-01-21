@@ -4,10 +4,10 @@
 namespace datachannels
 {
 	
-Endpoint::shared Endpoint::Create(TimeService& timeService, const Options& options) 
+Endpoint::shared Endpoint::Create(TimeService& timeService) 
 {
 	//Create endpoint
-	auto endpoint = std::make_shared<datachannels::impl::Endpoint>(timeService,options);
+	auto endpoint = std::make_shared<datachannels::impl::Endpoint>(timeService);
 	//Cast and return
 	return std::static_pointer_cast<Endpoint>(endpoint);
 }
@@ -15,9 +15,8 @@ Endpoint::shared Endpoint::Create(TimeService& timeService, const Options& optio
 namespace impl
 {
 
-Endpoint::Endpoint(datachannels::TimeService& timeService, const Options& options) :
-	association(timeService),
-	setup(options.setup)
+Endpoint::Endpoint(datachannels::TimeService& timeService) :
+	association(timeService)
 {
 	
 }
@@ -28,13 +27,14 @@ Endpoint::~Endpoint()
 	association.Abort();
 }
 
-bool Endpoint::Start(uint16_t remotePort)
+bool Endpoint::Init(const Options& options)
 {
-	//Set remote port on sctp
-	association.SetRemotePort(remotePort);
+	//Set ports on sctp
+	association.SetLocalPort(options.localPort);
+	association.SetRemotePort(options.remotePort);
 	
 	//If we are clients
-	if (setup==Setup::Client)
+	if (options.setup==Setup::Client)
 		//Start association
 		return association.Associate();
 	
@@ -44,7 +44,7 @@ bool Endpoint::Start(uint16_t remotePort)
 
 Datachannel::shared Endpoint::CreateDatachannel(const Datachannel::Options& options)
 {
-	
+	return nullptr;
 }
 
 bool Endpoint::Close()
@@ -62,11 +62,6 @@ uint16_t Endpoint::GetLocalPort() const
 uint16_t Endpoint::GetRemotePort() const
 {
 	return association.GetRemotePort();
-}
-
-Endpoint::Setup Endpoint::GetSetup() const
-{
-	return setup;
 }
 
 datachannels::Transport& Endpoint::GetTransport()

@@ -2,7 +2,7 @@
 #define SCTP_ASSOCIATION_H_
 #include <list>
 
-#include "datachannels.h"
+#include "Datachannels.h"
 #include "sctp/PacketHeader.h"
 #include "sctp/Stream.h"
 #include "BufferWritter.h"
@@ -33,8 +33,6 @@ public:
 	bool Shutdown();
 	bool Abort();
 
-	
-	
 	void SetLocalPort(uint16_t port) 	{ localPort = port;	}
 	void SetRemotePort(uint16_t port) 	{ remotePort = port;	}
 	uint16_t GetLocalPort() const 		{ return localPort;	}

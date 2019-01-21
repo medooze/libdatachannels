@@ -10,7 +10,7 @@
 namespace sctp
 {
 
-size_t SizePad(size_t size, size_t num)
+inline size_t SizePad(size_t size, size_t num)
 {
 	return ((size + num -1) / num ) * num;
 }
