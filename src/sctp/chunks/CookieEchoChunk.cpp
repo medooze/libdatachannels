@@ -1,4 +1,4 @@
-#include "CookieEchoChunk.h"
+#include "sctp/chunks/CookieEchoChunk.h"
 
 namespace sctp
 {

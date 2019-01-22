@@ -1,5 +1,3 @@
-target_include_directories (libdatachannels PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
 target_sources(libdatachannels PUBLIC 
 	${CMAKE_CURRENT_SOURCE_DIR}/AbortAssociationChunk.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/HeartbeatAckChunk.cpp
@@ -15,6 +13,7 @@ target_sources(libdatachannels PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/ReConfigChunk.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/ShutdownAssociationChunk.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/ForwardCumulativeTSNChunk.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/UnknownChunk.cpp
 )
 
 

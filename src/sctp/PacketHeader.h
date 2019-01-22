@@ -5,7 +5,7 @@
 #include <list>
 #include "BufferWritter.h"
 #include "BufferReader.h"
-#include "Chunk.h"
+#include "sctp/Chunk.h"
 
 namespace sctp
 {

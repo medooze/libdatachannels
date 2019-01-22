@@ -18,5 +18,6 @@
 #include "sctp/chunks/ReConfigChunk.cpp"
 #include "sctp/chunks/ShutdownAssociationChunk.cpp"
 #include "sctp/chunks/ForwardCumulativeTSNChunk.cpp"
+#include "sctp/chunks/UnknownChunk.h"
 
 

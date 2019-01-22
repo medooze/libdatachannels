@@ -2,7 +2,7 @@
 #define SCTP_INITIATIONACKNOWLEDGEMENTCHUNK_H_
 
 #include "Buffer.h"
-#include "Chunk.h"
+#include "sctp/Chunk.h"
 
 #include <optional>
 

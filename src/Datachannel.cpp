@@ -8,6 +8,9 @@ namespace impl
 Datachannel::Datachannel(const sctp::Stream::shared& stream)
 {
 	this->stream = stream;
+	this->stream->OnMessage([&](const uint8_t ppid, const uint8_t* buffer, const size_t size){
+		
+	});
 }
 	
 bool Datachannel::Send(MessageType type, const uint8_t* data, const uint64_t size)

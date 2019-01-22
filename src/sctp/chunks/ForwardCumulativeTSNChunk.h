@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include "Chunk.h"
+#include "sctp/Chunk.h"
 
 namespace sctp
 {

@@ -1,4 +1,4 @@
-#include "Stream.h"
+#include "sctp/Stream.h"
 
 namespace sctp
 {
@@ -11,6 +11,12 @@ Stream::Stream(Association &association, uint16_t id) :
 
 Stream::~Stream()
 {
+}
+
+bool Stream::Recv(const uint8_t ppid, const uint8_t* buffer, const size_t size) //first,last?
+{
+	//onMessage(ppid,buff)
+	return true;
 }
 
 bool Stream::Send(const uint8_t ppid, const uint8_t* buffer, const size_t size)

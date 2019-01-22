@@ -1,5 +1,5 @@
-#include "Association.h"
-#include "Chunk.h"
+#include "sctp/Association.h"
+#include "sctp/Chunk.h"
 
 #include <chrono>
 #include <random>
@@ -110,7 +110,7 @@ size_t Association::WritePacket(uint8_t *data, uint32_t size)
 	
 	//TODO: Check crc 
 	
-	//Parse packet heaer
+	//Parse packet header
 	auto header = PacketHeader::Parse(reader);
 
 	//Ensure it was correctly parsed

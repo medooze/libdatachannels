@@ -1,4 +1,4 @@
-#include "ReConfigChunk.h"
+#include "sctp/chunks/ReConfigChunk.h"
 
 namespace sctp
 {

@@ -3,16 +3,17 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include <cstdlib>
 
 class Buffer
 {
 public:
 	Buffer(const uint8_t* data, const size_t size)
 	{
-		//Set buffer size
-		capacity = size;
+		//Set buffer size to a 
+		capacity = ((size << 6) + 1) >> 6;
 		//Allocate memory
-		buffer = (uint8_t*) malloc(capacity);
+		buffer = (uint8_t*) std::aligned_alloc(capacity, 64);
 		//Copy
 		memcpy(buffer,data,size);
 		//Reset size
@@ -22,9 +23,9 @@ public:
 	Buffer(size_t capacity = 0)
 	{
 		//Set buffer size
-		this->capacity = capacity;
+		this->capacity = capacity ? ((size << 6) + 1) >> 6 : 0;
 		//Allocate memory
-		buffer = capacity ? (uint8_t*) malloc(capacity) : nullptr;
+		buffer = capacity ? std::aligned_alloc(capacity, 64) : nullptr;
 		//NO size
 		this->size = 0;
 	}
@@ -50,9 +51,13 @@ public:
 		return *this; 
 	}
 	
+	//Not copiable
+	Buffer(const Buffer &) = delete;
+	Buffer& operator=(const Buffer&) = delete;
+	
 	~Buffer()
 	{
-		if (buffer) free(buffer);
+		std::free(buffer);
 	}
 	
 	uint8_t* GetData() const		{ return buffer;		}
@@ -74,7 +79,7 @@ public:
 		//Calculate new size
 		this->capacity = capacity;
 		//Realloc
-		buffer = ( uint8_t*) realloc(buffer,capacity);
+		buffer = ( uint8_t*) std::realloc(buffer,capacity);
 		//Check new size
 		if (size>capacity)
 			//reduce size
@@ -88,7 +93,7 @@ public:
 			//Allocate new size
 			Alloc(size);
 		//Copy
-		memcpy(buffer,data,size);
+		std::memcpy(buffer,data,size);
 		//Reset size
 		this->size = size;
 	}
@@ -105,9 +110,20 @@ public:
 			//Allocate new size
 			Alloc(this->size+size);
 		//Copy
-		memcpy(buffer+size,data,size);
+		std::memcpy(buffer+size,data,size);
 		//Increase size
 		this->size += size;
+	}
+	
+	static Buffer&& Wrap(uint8_t* buffer, size_t size)
+	{
+		Buffer buffer;
+		
+		buffer.buffer = buffer;
+		buffer.capacity = size;
+		buffer.size = size;
+		
+		return std::move(buffer);
 	}
 	
 protected:

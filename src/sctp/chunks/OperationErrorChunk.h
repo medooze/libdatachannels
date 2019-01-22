@@ -4,8 +4,8 @@
 
 #include <vector>
 #include "Buffer.h"
-#include "Chunk.h"
-#include "ErrorCause.h"
+#include "sctp/Chunk.h"
+#include "sctp/ErrorCause.h"
 
 namespace sctp
 {

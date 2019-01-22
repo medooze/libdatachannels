@@ -3,7 +3,7 @@
 
 
 #include "Buffer.h"
-#include "Chunk.h"
+#include "sctp/Chunk.h"
 
 namespace sctp
 {

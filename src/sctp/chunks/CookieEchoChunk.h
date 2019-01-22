@@ -2,7 +2,7 @@
 #define SCTP_COOKIEECHOCHUNK_H_
 
 #include "Buffer.h"
-#include "Chunk.h"
+#include "sctp/Chunk.h"
 
 namespace sctp
 {

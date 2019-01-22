@@ -1,4 +1,4 @@
-#include "ShutdownAssociationChunk.h"
+#include "sctp/chunks/ShutdownAssociationChunk.h"
 
 namespace sctp
 {

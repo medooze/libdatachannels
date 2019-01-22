@@ -1,4 +1,4 @@
-#include "PacketHeader.h"
+#include "sctp/PacketHeader.h"
 
 namespace sctp
 {
@@ -10,7 +10,7 @@ PacketHeader::PacketHeader(uint16_t sourcePortNumber,uint16_t destinationPortNum
 	this->verificationTag = verificationTag;
 }
 
-static PacketHeader::shared Parse(BufferReader& reader)
+PacketHeader::shared PacketHeader::Parse(BufferReader& reader)
 {
 	//Check size
 	if (reader.Assert(8)) return nullptr;
