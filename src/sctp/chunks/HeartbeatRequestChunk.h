@@ -1,7 +1,6 @@
 #ifndef SCTP_HEARTBEATREQUESTCHUNK_H_
 #define SCTP_HEARTBEATREQUESTCHUNK_H_
 
-
 #include "Buffer.h"
 #include "sctp/Chunk.h"
 

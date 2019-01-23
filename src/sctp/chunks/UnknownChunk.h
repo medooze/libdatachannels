@@ -1,5 +1,5 @@
-#ifndef SCTP_COOKIEECHOCHUNK_H_
-#define SCTP_COOKIEECHOCHUNK_H_
+#ifndef SCTP_UNKNOWNCHUNK_H_
+#define SCTP_UNKNOWNCHUNK_H_
 
 #include "Buffer.h"
 #include "sctp/Chunk.h"

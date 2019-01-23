@@ -6,7 +6,7 @@ namespace sctp
 size_t UnknownChunk::GetSize() const
 {
 	//Header + buffer
-	return SizePad(4+buffer.GetSize());
+	return SizePad(4, 4+buffer.GetSize());
 }
 
 size_t UnknownChunk::Serialize(BufferWritter& writter) const

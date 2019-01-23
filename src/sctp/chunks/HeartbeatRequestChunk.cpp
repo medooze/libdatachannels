@@ -1,9 +1,9 @@
-#include "sctp/chunks/InitiationChunk.h"
+#include "sctp/chunks/HeartbeatRequestChunk.h"
 
 namespace sctp
 {
 	
-size_t InitiationChunk::GetSize()
+size_t HeartbeatRequestChunk::GetSize() const
 {
 	//Header + attributes
 	size_t size = 20;
@@ -12,7 +12,7 @@ size_t InitiationChunk::GetSize()
 	return size;
 }
 
-size_t InitiationChunk::Serialize(BuffferWritter& writter)
+size_t HeartbeatRequestChunk::Serialize(BufferWritter& writter) const
 {
 	//Write header
 	writter.Set1(type);
@@ -31,7 +31,7 @@ size_t InitiationChunk::Serialize(BuffferWritter& writter)
 	return length;
 }
 	
-Chunk::Shared InitiationChunk::Parse(const BuffferReader& reader)
+Chunk::shared HeartbeatRequestChunk::Parse(BufferReader& reader)
 {
 	//Check size
 	if (!reader.Assert(20)) 
@@ -50,7 +50,7 @@ Chunk::Shared InitiationChunk::Parse(const BuffferReader& reader)
 		return nullptr;
 		
 	//Create chunk
-	auto init = std::make_shared<InitiationChunk>();
+	auto init = std::make_shared<HeartbeatRequestChunk>();
 		
 	//Done
 	return std::static_pointer_cast<Chunk>(init);

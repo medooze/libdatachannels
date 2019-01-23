@@ -1,5 +1,4 @@
 #include "sctp/Chunk.h"
-#include "UnknownChunk.h"
 
 namespace sctp
 {
@@ -12,7 +11,7 @@ Chunk::shared Chunk::Parse(const BufferReader& buffer)
 	//Ensure we have at laast the header
 	if (!reader.Assert(4))
 		//Error
-		return false;
+		return nullptr;
 	
 	// Peek type
 	switch((Type)reader.Peek1())
