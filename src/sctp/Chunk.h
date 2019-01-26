@@ -120,6 +120,7 @@ public:
 #include "sctp/chunks/ReConfigChunk.h"
 #include "sctp/chunks/ShutdownAssociationChunk.h"
 #include "sctp/chunks/ForwardCumulativeTSNChunk.h"
+#include "sctp/chunks/UnknownChunk.h"
 
 
 

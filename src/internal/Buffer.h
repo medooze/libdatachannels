@@ -1,9 +1,16 @@
 #ifndef LIBDATACHANNELS_INTERNAL_BUFFER_H_
 #define	LIBDATACHANNELS_INTERNAL_BUFFER_H_
 #include <stdint.h>
-#include <string.h>
-#include <stdlib.h>
+#include <stddef.h>
 #include <cstdlib>
+#include <cstring>
+
+
+//Allingment must be a power of 2
+inline int RoundUp(size_t alignment, size_t size) 
+{
+   return (size + alignment - 1) & -alignment;
+}
 
 class Buffer
 {
@@ -11,9 +18,9 @@ public:
 	Buffer(const uint8_t* data, const size_t size)
 	{
 		//Set buffer size to a 
-		capacity = ((size << 6) + 1) >> 6;
+		capacity = RoundUp(64,size);
 		//Allocate memory
-		buffer = (uint8_t*) std::aligned_alloc(capacity, 64);
+		buffer = (uint8_t*) std::aligned_alloc(64, this->capacity);
 		//Copy
 		memcpy(buffer,data,size);
 		//Reset size
@@ -23,9 +30,9 @@ public:
 	Buffer(size_t capacity = 0)
 	{
 		//Set buffer size
-		this->capacity = capacity ? ((size << 6) + 1) >> 6 : 0;
+		this->capacity = capacity ? RoundUp(64,capacity) : 0;
 		//Allocate memory
-		buffer = capacity ? std::aligned_alloc(capacity, 64) : nullptr;
+		buffer = capacity ? (uint8_t*) std::aligned_alloc(64, this->capacity) : nullptr;
 		//NO size
 		this->size = 0;
 	}
@@ -115,11 +122,11 @@ public:
 		this->size += size;
 	}
 	
-	static Buffer&& Wrap(uint8_t* buffer, size_t size)
+	static Buffer&& Wrap(uint8_t* data, size_t size)
 	{
 		Buffer buffer;
 		
-		buffer.buffer = buffer;
+		buffer.buffer = data;
 		buffer.capacity = size;
 		buffer.size = size;
 		
