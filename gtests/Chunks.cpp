@@ -8,7 +8,8 @@
 #include <gtest/gtest.h>
 
 #include "BufferReader.h"
-#include "PacketHeader.h"
+#include "sctp/PacketHeader.h"
+#include "sctp/Chunk.h"
 
 class Chunks : public testing::Test
 {

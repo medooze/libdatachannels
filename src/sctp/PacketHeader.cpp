@@ -13,12 +13,13 @@ PacketHeader::PacketHeader(uint16_t sourcePortNumber,uint16_t destinationPortNum
 PacketHeader::shared PacketHeader::Parse(BufferReader& reader)
 {
 	//Check size
-	if (reader.Assert(8)) return nullptr;
+	if (!reader.Assert(8)) return nullptr;
 	
 	//Get header
 	uint16_t sourcePortNumber	= reader.Get2();
 	uint16_t destinationPortNumber	= reader.Get2();
 	uint32_t verificationTag	= reader.Get4();
+	uint32_t checksum		= reader.Get4();
 	
 	//Create PacketHeader
 	auto header = std::make_shared<PacketHeader>(sourcePortNumber,destinationPortNumber,verificationTag);
@@ -29,19 +30,20 @@ PacketHeader::shared PacketHeader::Parse(BufferReader& reader)
 
 size_t PacketHeader::GetSize() const
 {
-	//ports + tag 
-	return 8;
+	//ports + tag + checksum
+	return 12;
 }
 
 size_t PacketHeader::Serialize(BufferWritter& writter) const
 {
 	//Check size
-	if (writter.Assert(8)) return 0;
+	if (!writter.Assert(12)) return 0;
 	
 	//Set header
 	writter.Set2(sourcePortNumber);
 	writter.Set2(destinationPortNumber);
 	writter.Set4(verificationTag);
+	writter.Set4(checksum);
 	
 	//Done
 	return writter.GetLength();

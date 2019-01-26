@@ -25,6 +25,7 @@ public:
 	uint16_t sourcePortNumber	 = 0;
 	uint16_t destinationPortNumber	 = 0;
 	uint32_t verificationTag	 = 0;
+	uint32_t checksum		 = 0;
 };
 
 }; // namespace sctp

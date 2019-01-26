@@ -153,7 +153,7 @@ Chunk::shared InitiationChunk::Parse(BufferReader& reader)
 		if (paramLength<4)
 			throw new std::runtime_error("Wrong parameter length");
 		//Ensure we have enought length
-		if (!reader.Assert(paramLength)) return nullptr;
+		if (!reader.Assert(paramLength-4)) return nullptr;
 		//Get reader for the param length
 		BufferReader paramReader = reader.GetReader(paramLength-4);
 		//Depending on the parameter type
@@ -171,11 +171,11 @@ Chunk::shared InitiationChunk::Parse(BufferReader& reader)
 				init->hostName = paramReader.GetString(paramReader.GetLeft());
 				break;
 			case Parameter::SupportedAddressTypes:
-				for (size_t i=0; i<paramLength; i=i+2)
+				while (paramReader.GetLeft())
 					init->supportedAddressTypes.push_back(paramReader.Get2());
 				break;
 			case Parameter::SupportedExtensions:
-				for (size_t i=0; i<paramLength; ++i)
+				while (paramReader.GetLeft())
 					init->supportedExtensions.push_back(paramReader.Get1());
 				break;
 			case Parameter::CookiePreservative:

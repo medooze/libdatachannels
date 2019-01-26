@@ -3,11 +3,8 @@
 namespace sctp
 {
 	
-Chunk::shared Chunk::Parse(const BufferReader& buffer)
+Chunk::shared Chunk::Parse(BufferReader& reader)
 {
-	//Create reader
-	BufferReader reader(buffer);
-	
 	//Ensure we have at laast the header
 	if (!reader.Assert(4))
 		//Error

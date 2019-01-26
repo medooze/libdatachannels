@@ -75,7 +75,7 @@ public:
 	}
 	virtual ~Chunk() = default;
 	
-	static Chunk::shared Parse(const BufferReader& buffer);
+	static Chunk::shared Parse(BufferReader& buffer);
 	virtual size_t GetSize() const = 0;
 	virtual size_t Serialize(BufferWritter& buffer) const = 0;
 	

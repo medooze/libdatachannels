@@ -1,2 +1,7 @@
+find_package(GTest REQUIRED)
+find_package (Threads REQUIRED)
 add_executable (gtests Chunks.cpp)
 target_link_libraries (gtests LINK_PUBLIC libdatachannels)
+target_link_libraries(gtests gtest gtest_main)
+target_link_libraries(gtests Threads::Threads)
+gtest_discover_tests(gtests)
