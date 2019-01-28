@@ -3,11 +3,12 @@
 namespace sctp
 {
 	
-PacketHeader::PacketHeader(uint16_t sourcePortNumber,uint16_t destinationPortNumber,uint32_t verificationTag)
+PacketHeader::PacketHeader(uint16_t sourcePortNumber,uint16_t destinationPortNumber,uint32_t verificationTag, uint32_t checksum)
 {
 	this->sourcePortNumber = sourcePortNumber;
 	this->destinationPortNumber = destinationPortNumber;
 	this->verificationTag = verificationTag;
+	this->checksum = checksum;
 }
 
 PacketHeader::shared PacketHeader::Parse(BufferReader& reader)
@@ -22,7 +23,7 @@ PacketHeader::shared PacketHeader::Parse(BufferReader& reader)
 	uint32_t checksum		= reader.Get4();
 	
 	//Create PacketHeader
-	auto header = std::make_shared<PacketHeader>(sourcePortNumber,destinationPortNumber,verificationTag);
+	auto header = std::make_shared<PacketHeader>(sourcePortNumber,destinationPortNumber,verificationTag,checksum);
 	
 	//Done
 	return header;

@@ -15,7 +15,7 @@ class PacketHeader
 public:
 	using shared = std::shared_ptr<PacketHeader>;
 public:	
-	PacketHeader(uint16_t sourcePortNumber,uint16_t destinationPortNumber,uint32_t verificationTag);
+	PacketHeader(uint16_t sourcePortNumber,uint16_t destinationPortNumber,uint32_t verificationTag, uint32_t checksum = 0);
 	~PacketHeader() = default;
 	
 	static PacketHeader::shared Parse(BufferReader& buffer) ;

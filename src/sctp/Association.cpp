@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <random>
+#include <crc32c/crc32c.h>
 
 using namespace std::chrono_literals;
 
@@ -189,21 +190,22 @@ size_t Association::ReadPacket(uint8_t *data, uint32_t size)
 		//Error
 		return 0;
 	
-	//Get CRC position
-	size_t mark = writter.Mark();
-	//Set to 0
-	writter.Set4(0);
+	//Get length
+	size_t length = writter.GetLength();
 	//Calculate crc
-	uint32_t crc32c = 1; //TODO: CalcCRC32c(writter.GetData(),writter.GetLength());
-	//Set it
-	writter.Set4(mark, crc32c);
+	header.checksum  = crc32c::Extend(0,data,length);
+	//Go to the begining
+	writter.GoTo(0);
+	
+	//Serialize it now with checksum
+	header.Serialize(writter);
 	
 	//Check if there is more data to send
 	if (!queue.size())
 		//No
 		pendingData = false;
 	//Done
-	return writter.GetLength();
+	return length;
 }
 
 void Association::Process(const Chunk::shared& chunk)
