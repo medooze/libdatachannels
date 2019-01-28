@@ -26,9 +26,12 @@ size_t InitiationChunk::GetSize() const
 
 size_t InitiationChunk::Serialize(BufferWritter& writter) const
 {
+	if (!writter.Assert(20))
+		return 0;
+	
 	//Write header
 	writter.Set1(type);
-	writter.Set1(0);
+	writter.Set1(flag);
 	//Skip length position
 	size_t mark = writter.Skip(2);
 	
@@ -41,6 +44,8 @@ size_t InitiationChunk::Serialize(BufferWritter& writter) const
 	
 	for (const auto& ipV4Address : ipV4Addresses)
 	{
+		if (!writter.Assert(12))
+			return 0;
 		//Write it
 		writter.Set2(Parameter::IPv4Address);
 		writter.Set2(8+4);
@@ -49,6 +54,8 @@ size_t InitiationChunk::Serialize(BufferWritter& writter) const
 	}
 	for (const auto& ipV6Address : ipV6Addresses)
 	{
+		if (!writter.Assert(24))
+			return 0;
 		//Write it
 		writter.Set2(Parameter::IPv6Address);
 		writter.Set2(20+4);
@@ -65,6 +72,8 @@ size_t InitiationChunk::Serialize(BufferWritter& writter) const
 	}
 	if (hostName)
 	{
+		if (!writter.Assert(8+hostName->length()))
+			return 0;
 		//Write it
 		writter.Set2(Parameter::HostNameAddress);
 		writter.Set2(hostName->length()+4);
@@ -73,6 +82,8 @@ size_t InitiationChunk::Serialize(BufferWritter& writter) const
 	}
 	if (supportedAddressTypes.size())
 	{
+		if (!writter.Assert(supportedAddressTypes.size()*2+4))
+			return 0;
 		//Write it
 		writter.Set2(Parameter::SupportedAddressTypes);
 		writter.Set2(supportedAddressTypes.size()*2+4);
@@ -82,6 +93,8 @@ size_t InitiationChunk::Serialize(BufferWritter& writter) const
 	}
 	if (supportedExtensions.size())
 	{
+		if (!writter.Assert(supportedExtensions.size()+4))
+			return 0;
 		//Write it
 		writter.Set2(Parameter::SupportedExtensions);
 		writter.Set2(supportedExtensions.size()+4);
@@ -91,6 +104,8 @@ size_t InitiationChunk::Serialize(BufferWritter& writter) const
 	}
 	for (const auto& unknownParameter : unknownParameters)
 	{
+		if (!writter.Assert(unknownParameter.second.GetSize()+4))
+			return 0;
 		//Write it
 		writter.Set2(unknownParameter.first);
 		writter.Set2(unknownParameter.second.GetSize()+4);
@@ -99,6 +114,8 @@ size_t InitiationChunk::Serialize(BufferWritter& writter) const
 	}
 	if (forwardTSNSupported)
 	{
+		if (!writter.Assert(4))
+			return 0;
 		//Write it
 		writter.Set2(Parameter::ForwardTSNSupported);
 		writter.Set2(4);
@@ -144,7 +161,7 @@ Chunk::shared InitiationChunk::Parse(BufferReader& reader)
 	init->forwardTSNSupported		= false;
 	
 	//Read parameters
-	while (reader.GetLeft()>4)
+	while (reader.GetLeft()>=4)
 	{
 		//Get parameter type
 		uint16_t paramType = reader.Get2();
@@ -191,7 +208,8 @@ Chunk::shared InitiationChunk::Parse(BufferReader& reader)
 		}
 		//Ensure all input has been consumed
 		if (paramReader.GetLeft())
-			throw new std::runtime_error("Wrong parameter");
+			//Error
+			return nullptr;
 		//Do padding
 		reader.PadTo(4);
 	}

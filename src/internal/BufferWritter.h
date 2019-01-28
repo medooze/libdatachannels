@@ -13,7 +13,7 @@ public:
 	BufferWritter(Buffer& buffer)
 	{
 		this->data = buffer.GetData();
-		this->size = buffer.GetSize();
+		this->size = buffer.GetCapacity();
 		this->pos = 0;
 	}
 	
@@ -23,8 +23,8 @@ public:
 		this->size = size;
 		this->pos = 0;
 	}
-	inline BufferWritter GetWritter(size_t num) 	{ pos+=num; return GetWritter(pos-num, num);	}
-	inline BufferWritter GetWritter(size_t i,size_t num) 	{ return BufferWritter(data+i, num);	}
+	inline BufferWritter GetWritter(size_t num)		{ pos+=num; return GetWritter(pos-num, num);		}
+	inline BufferWritter GetWritter(size_t i,size_t num) 	{ return BufferWritter(data+i, num);			}
 	
 	template<std::size_t N> 
 	inline size_t Set(const std::array<uint8_t,N>& array)	 { Set(pos,array);  return pos+=N;			}
@@ -109,7 +109,7 @@ public:
 		return pos;
 	}
 
-	bool   Assert(size_t num) const 	{ return pos+num<size;	}
+	bool   Assert(size_t num) const 	{ return pos+num<=size;	}
 	void   GoTo(size_t mark) 		{ pos = mark;		}
 	size_t Skip(size_t num) 		{ size_t mark = pos; pos += num; return mark;	}
 	int64_t  GetOffset(size_t mark) const 	{ return pos-mark;	}

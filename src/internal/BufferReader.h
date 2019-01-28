@@ -96,7 +96,7 @@ public:
 		return pos;
 	}
 	
-	bool   Assert(size_t num) const 	{ return pos+num<size;	}
+	bool   Assert(size_t num) const 	{ return pos+num<=size;	}
 	void   GoTo(size_t mark) 		{ pos = mark;		}
 	size_t Skip(size_t num) 		{ size_t mark = pos; pos += num; return mark;	}
 	int64_t  GetOffset(size_t mark) const 	{ return pos-mark;	}

@@ -51,7 +51,46 @@ TEST_F(Chunks, ParseInit)
 	ASSERT_TRUE(header);
 	auto chunk = sctp::Chunk::Parse(reader);
 	ASSERT_TRUE(chunk);
+	ASSERT_EQ(chunk->type,sctp::Chunk::INIT);
 	ASSERT_FALSE(reader.GetLeft());
 
 }
 
+TEST_F(Chunks, SerializeInit)
+{
+	Buffer buffer(1200);
+	
+	//Create init chunk
+	sctp::InitiationChunk init;
+	init.advertisedReceiverWindowCredit = 6500;
+	init.numberOfOutboundStreams = 1024;
+	init.numberOfInboundStreams = 2048;
+	init.initialTransmissionSequenceNumber = 128;
+	init.suggestedCookieLifeSpanIncrement = 32000;
+	init.supportedAddressTypes = {1,2};
+	init.supportedExtensions = {3,4,5,6,7};
+	init.forwardTSNSupported = true;
+	
+	//Serialize
+	BufferWritter writter(buffer);
+	size_t len = init.Serialize(writter);
+	ASSERT_TRUE(len);
+	buffer.SetSize(len);
+
+	//Parse it again
+	BufferReader reader(buffer);
+	auto chunk = sctp::Chunk::Parse(reader);
+	ASSERT_TRUE(chunk);
+	ASSERT_EQ(chunk->type,sctp::Chunk::INIT);
+	//Check chunk is equal to init chunk
+	auto init2 = std::static_pointer_cast<sctp::InitiationChunk>(chunk);
+	ASSERT_EQ(init2->advertisedReceiverWindowCredit		,init.advertisedReceiverWindowCredit);
+	ASSERT_EQ(init2->numberOfOutboundStreams		,init.numberOfOutboundStreams);
+	ASSERT_EQ(init2->numberOfInboundStreams			,init.numberOfInboundStreams);
+	ASSERT_EQ(init2->initialTransmissionSequenceNumber	,init.initialTransmissionSequenceNumber);
+	ASSERT_EQ(init2->suggestedCookieLifeSpanIncrement	,init.suggestedCookieLifeSpanIncrement);
+	ASSERT_EQ(init2->supportedAddressTypes.size()		,init.supportedAddressTypes.size());
+	ASSERT_EQ(init2->supportedExtensions.size()		,init.supportedExtensions.size());
+	ASSERT_EQ(init2->forwardTSNSupported			,init.forwardTSNSupported);
+	
+}
