@@ -17,7 +17,7 @@ public:
 	
 	virtual size_t Serialize(BufferWritter& buffer) const override;
 	virtual size_t GetSize() const override;
-	
+
 	static Chunk::shared Parse(BufferReader& reader);
 public:
 	//        0                   1                   2                   3
@@ -36,7 +36,7 @@ public:
 	//       \                                                               \
 	//       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+	
 	bool beginingFragment			= false;
-	bool endinfFragment			= false;
+	bool endingFragment			= false;
 	uint16_t length				= 0;
 	uint16_t streamIdentifier		= 0;
 	uint16_t streamSequenceNumber		= 0;

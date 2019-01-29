@@ -40,6 +40,7 @@ public:
 		// 15 to 62   - available
 		// 63         - reserved for IETF-defined Chunk Extensions
 		// 64 to 126  - available
+		PAD			= 84,
 		// 127        - reserved for IETF-defined Chunk Extensions
 		// 128 to 190 - available
 		RE_CONFIG		= 130, // Re-configuration Chunk (RE-CONFIG) rfc6525
@@ -51,6 +52,8 @@ public:
 	
 	enum Parameter
 	{
+		
+		HeartbeatInfo				= 1,
 		IPv4Address				= 5,
 		IPv6Address				= 6,
 		StateCookie				= 7,
@@ -67,6 +70,7 @@ public:
 		AddIncomingStreamsRequestParameter	= 18,
 		SupportedExtensions			= 0x8008, //rfc5061
 		ForwardTSNSupported			= 49152,  //rfc3758 (0xC000)
+		Padding					= 0x8005, //rfc480
 	};
 	
 	Chunk(uint8_t type)
@@ -100,7 +104,7 @@ public:
 	
 public:	
 	uint8_t type;
-	uint8_t flag;
+	uint8_t flag = 0;
 };
 
 }; // namespace sctp
@@ -121,6 +125,7 @@ public:
 #include "sctp/chunks/ShutdownAssociationChunk.h"
 #include "sctp/chunks/ForwardCumulativeTSNChunk.h"
 #include "sctp/chunks/UnknownChunk.h"
+#include "sctp/chunks/PaddingChunk.h"
 
 
 

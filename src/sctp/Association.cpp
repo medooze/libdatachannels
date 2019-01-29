@@ -245,7 +245,7 @@ void Association::Process(const Chunk::shared& chunk)
 
 					//Set params
 					initAck->initiateTag			= localVerificationTag;
-					initAck->advertisedReceiverWindowCredit	= 0;
+					initAck->advertisedReceiverWindowCredit	= localAdvertisedReceiverWindowCredit;
 					initAck->numberOfOutboundStreams	= 0xFFFF;
 					initAck->numberOfInboundStreams		= 0xFFFF;
 					initAck->initialTransmissionSequenceNumber = 0;
@@ -268,7 +268,10 @@ void Association::Process(const Chunk::shared& chunk)
 					// AAA is ensured by the DTLS & ICE layer, so createing a complex cookie is unnecessary IMHO
 					initAck->stateCookie.SetData((uint8_t*)"dtls",strlen("dtls"));
 
-					// TODO: Send back unkown parameters
+					//Send back unkown parameters
+					for (const auto& unknown : init->unknownParameters)
+						//Copy as unrecognized
+						initAck->unrecognizedParameters.push_back(unknown.second.Clone());
 					
 					///Enquee
 					Enqueue(std::static_pointer_cast<Chunk>(initAck));
@@ -286,6 +289,8 @@ void Association::Process(const Chunk::shared& chunk)
 					
 					//Enqueue new INIT chunk
 					auto cookieAck = std::make_shared<CookieAckChunk>();
+					
+					//We don't check the cookie for seame reasons as we don't create one
 					
 					///Enquee
 					Enqueue(std::static_pointer_cast<Chunk>(cookieAck));

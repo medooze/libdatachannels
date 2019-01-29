@@ -91,9 +91,10 @@ public:
 	size_t   PadTo(size_t num)
 	{
 		size_t reminder = pos % num;
-		if (reminder)
-			pos += (num - reminder);
-		return pos;
+		size_t padding = reminder ? num - reminder : 0;
+		if (!Assert(padding))
+			return 0;
+		return Skip(padding);
 	}
 	
 	bool   Assert(size_t num) const 	{ return pos+num<=size;	}

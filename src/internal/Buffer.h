@@ -123,6 +123,12 @@ public:
 		this->size += size;
 	}
 	
+	Buffer&& Clone() const
+	{
+		Buffer clone(buffer,size);
+		return std::move(clone);
+	}
+	
 	static Buffer&& Wrap(uint8_t* data, size_t size)
 	{
 		Buffer buffer;

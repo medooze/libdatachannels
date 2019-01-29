@@ -16,11 +16,9 @@ size_t CookieAckChunk::Serialize(BufferWritter& writter) const
 {
 	//Write header
 	writter.Set1(type);
-	writter.Set1(0);
+	writter.Set1(flag);
 	//Skip length position
 	size_t mark = writter.Skip(2);
-	
-	
 	
 	//Get length
 	size_t length = writter.GetLength();
@@ -34,7 +32,7 @@ size_t CookieAckChunk::Serialize(BufferWritter& writter) const
 Chunk::shared CookieAckChunk::Parse(BufferReader& reader)
 {
 	//Check size
-	if (!reader.Assert(20)) 
+	if (!reader.Assert(4)) 
 		//Error
 		return nullptr;
 	
@@ -45,7 +43,7 @@ Chunk::shared CookieAckChunk::Parse(BufferReader& reader)
 	uint16_t length	= reader.Get2();
 	
 	//Check type
-	if (type!=Type::INIT)
+	if (type!=Type::COOKIE_ACK)
 		//Error
 		return nullptr;
 		

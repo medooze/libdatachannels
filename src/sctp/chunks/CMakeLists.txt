@@ -15,6 +15,7 @@ target_sources(libdatachannels PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/ShutdownAssociationChunk.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/ShutdownCompleteChunk.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/UnknownChunk.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/PaddingChunk.cpp
 )
 
 

@@ -60,7 +60,7 @@ TEST_F(Chunks, SerializeInit)
 {
 	Buffer buffer(1200);
 	
-	//Create init chunk
+	//Create chunk
 	sctp::InitiationChunk init;
 	init.advertisedReceiverWindowCredit = 6500;
 	init.numberOfOutboundStreams = 1024;
@@ -93,4 +93,192 @@ TEST_F(Chunks, SerializeInit)
 	ASSERT_EQ(init2->supportedExtensions.size()		,init.supportedExtensions.size());
 	ASSERT_EQ(init2->forwardTSNSupported			,init.forwardTSNSupported);
 	
+}
+
+TEST_F(Chunks, SerializeInitAck)
+{
+	Buffer buffer(1200);
+	uint8_t cookie[5] = {0,1,2,3,4};
+	
+	//Create chunk
+	sctp::InitiationAcknowledgementChunk ack;
+	ack.advertisedReceiverWindowCredit = 6500;
+	ack.numberOfOutboundStreams = 1024;
+	ack.numberOfInboundStreams = 2048;
+	ack.initialTransmissionSequenceNumber = 128;
+	ack.supportedExtensions = {3,4,5,6,7};
+	ack.stateCookie.SetData(cookie,sizeof(cookie));
+	ack.forwardTSNSupported = true;
+	
+	//Serialize
+	BufferWritter writter(buffer);
+	size_t len = ack.Serialize(writter);
+	ASSERT_TRUE(len);
+	buffer.SetSize(len);
+
+	//Parse it again
+	BufferReader reader(buffer);
+	auto chunk = sctp::Chunk::Parse(reader);
+	ASSERT_TRUE(chunk);
+	ASSERT_EQ(chunk->type,sctp::Chunk::INIT_ACK);
+	//Check chunk is equal to init chunk
+	auto ack2 = std::static_pointer_cast<sctp::InitiationAcknowledgementChunk>(chunk);
+	ASSERT_EQ(ack2->advertisedReceiverWindowCredit		,ack.advertisedReceiverWindowCredit);
+	ASSERT_EQ(ack2->numberOfOutboundStreams			,ack.numberOfOutboundStreams);
+	ASSERT_EQ(ack2->numberOfInboundStreams			,ack.numberOfInboundStreams);
+	ASSERT_EQ(ack2->initialTransmissionSequenceNumber	,ack.initialTransmissionSequenceNumber);
+	ASSERT_EQ(ack2->stateCookie.GetSize()			,ack.stateCookie.GetSize());
+	ASSERT_EQ(ack2->supportedExtensions.size()		,ack.supportedExtensions.size());
+	ASSERT_EQ(ack2->forwardTSNSupported			,ack.forwardTSNSupported);
+	
+}
+
+
+TEST_F(Chunks, SerializeCookieEcho)
+{
+	Buffer buffer(1200);
+	uint8_t cookie[5] = {0,1,2,3,4};
+	
+	//Create chunk
+	sctp::CookieEchoChunk echo;
+	echo.cookie.SetData(cookie,sizeof(cookie));
+	
+	//Serialize
+	BufferWritter writter(buffer);
+	size_t len = echo.Serialize(writter);
+	ASSERT_TRUE(len);
+	buffer.SetSize(len);
+
+	//Parse it again
+	BufferReader reader(buffer);
+	auto chunk = sctp::Chunk::Parse(reader);
+	ASSERT_TRUE(chunk);
+	ASSERT_EQ(chunk->type,sctp::Chunk::COOKIE_ECHO);
+	//Check chunk is equal to init chunk
+	auto echo2 = std::static_pointer_cast<sctp::CookieEchoChunk>(chunk);
+	ASSERT_EQ(echo2->cookie.GetSize()			,echo.cookie.GetSize());
+}
+
+
+TEST_F(Chunks, SerializeCookieAck)
+{
+	Buffer buffer(1200);
+	//Create chunk
+	sctp::CookieAckChunk ack;
+	
+	//Serialize
+	BufferWritter writter(buffer);
+	size_t len = ack.Serialize(writter);
+	ASSERT_TRUE(len);
+	buffer.SetSize(len);
+
+	//Parse it again
+	BufferReader reader(buffer);
+	auto chunk = sctp::Chunk::Parse(reader);
+	ASSERT_TRUE(chunk);
+	ASSERT_EQ(chunk->type,sctp::Chunk::COOKIE_ACK);
+	//Check chunk is equal to init chunk
+	auto ack2 = std::static_pointer_cast<sctp::CookieAckChunk>(chunk);
+	ASSERT_TRUE(ack2);
+	
+}
+
+TEST_F(Chunks, SerializeHeartbeatRequest)
+{
+	Buffer buffer(1200);
+	uint8_t info[5] = {0,1,2,3,4};
+	
+	//Create chunk
+	sctp::HeartbeatRequestChunk heartbeat;
+	heartbeat.senderSpecificHearbeatInfo.SetData(info,sizeof(info));
+	
+	//Serialize
+	BufferWritter writter(buffer);
+	size_t len = heartbeat.Serialize(writter);
+	ASSERT_TRUE(len);
+	buffer.SetSize(len);
+
+	//Parse it again
+	BufferReader reader(buffer);
+	auto chunk = sctp::Chunk::Parse(reader);
+	ASSERT_TRUE(chunk);
+	ASSERT_EQ(chunk->type,sctp::Chunk::HEARTBEAT);
+	//Check chunk is equal to init chunk
+	auto heartbeat2 = std::static_pointer_cast<sctp::HeartbeatRequestChunk>(chunk);
+	ASSERT_EQ(heartbeat2->senderSpecificHearbeatInfo.GetSize()	,heartbeat.senderSpecificHearbeatInfo.GetSize());
+}
+
+TEST_F(Chunks, SerializeHeartbeatAck)
+{
+	Buffer buffer(1200);
+	uint8_t info[5] = {0,1,2,3,4};
+	
+	//Create chunk
+	sctp::HeartbeatAckChunk heartbeat;
+	heartbeat.senderSpecificHearbeatInfo.SetData(info,sizeof(info));
+	
+	//Serialize
+	BufferWritter writter(buffer);
+	size_t len = heartbeat.Serialize(writter);
+	ASSERT_TRUE(len);
+	buffer.SetSize(len);
+
+	//Parse it again
+	BufferReader reader(buffer);
+	auto chunk = sctp::Chunk::Parse(reader);
+	ASSERT_TRUE(chunk);
+	ASSERT_EQ(chunk->type,sctp::Chunk::HEARTBEAT_ACK);
+	//Check chunk is equal to init chunk
+	auto heartbeat2 = std::static_pointer_cast<sctp::HeartbeatAckChunk>(chunk);
+	ASSERT_EQ(heartbeat2->senderSpecificHearbeatInfo.GetSize()	,heartbeat.senderSpecificHearbeatInfo.GetSize());
+}
+
+TEST_F(Chunks, SerializePadding)
+{
+	Buffer buffer(1200);
+	uint8_t info[7] = {0,1,2,3,4,5,6};
+	
+	//Create chunk
+	sctp::PaddingChunk padding;
+	padding.buffer.SetData(info,sizeof(info));
+	
+	//Serialize
+	BufferWritter writter(buffer);
+	size_t len = padding.Serialize(writter);
+	ASSERT_TRUE(len);
+	buffer.SetSize(len);
+
+	//Parse it again
+	BufferReader reader(buffer);
+	auto chunk = sctp::Chunk::Parse(reader);
+	ASSERT_TRUE(chunk);
+	ASSERT_EQ(chunk->type,sctp::Chunk::PAD);
+	//Check chunk is equal to init chunk
+	auto padding2 = std::static_pointer_cast<sctp::PaddingChunk>(chunk);
+	ASSERT_EQ(padding2->buffer.GetSize()		,padding.buffer.GetSize());
+}
+
+TEST_F(Chunks, SerializeUnknown)
+{
+	Buffer buffer(1200);
+	uint8_t info[8] = {0,1,2,3,4,5,6,7};
+	
+	//Create chunk
+	sctp::UnknownChunk unknown(255);
+	unknown.buffer.SetData(info,sizeof(info));
+	
+	//Serialize
+	BufferWritter writter(buffer);
+	size_t len = unknown.Serialize(writter);
+	ASSERT_TRUE(len);
+	buffer.SetSize(len);
+
+	//Parse it again
+	BufferReader reader(buffer);
+	auto chunk = sctp::Chunk::Parse(reader);
+	ASSERT_TRUE(chunk);
+	ASSERT_EQ(chunk->type,255);
+	//Check chunk is equal to init chunk
+	auto unknown2 = std::static_pointer_cast<sctp::UnknownChunk>(chunk);
+	ASSERT_EQ(unknown2->buffer.GetSize()		,unknown.buffer.GetSize());
 }

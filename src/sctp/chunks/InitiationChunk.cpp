@@ -26,6 +26,7 @@ size_t InitiationChunk::GetSize() const
 
 size_t InitiationChunk::Serialize(BufferWritter& writter) const
 {
+	//Check header length
 	if (!writter.Assert(20))
 		return 0;
 	
@@ -42,84 +43,133 @@ size_t InitiationChunk::Serialize(BufferWritter& writter) const
 	writter.Set2(numberOfInboundStreams);
 	writter.Set4(initialTransmissionSequenceNumber);
 	
+	//IPV4 addresses
 	for (const auto& ipV4Address : ipV4Addresses)
 	{
-		if (!writter.Assert(12))
+		//Check parameter length
+		size_t len = 12;
+		if (!writter.Assert(len))
 			return 0;
 		//Write it
 		writter.Set2(Parameter::IPv4Address);
-		writter.Set2(8+4);
+		writter.Set2(len);
 		writter.Set<8>(ipV4Address);
-		writter.PadTo(4);
+		//Pad input
+		if (!writter.PadTo(4))
+			return 0;
 	}
+	
+	//IPV6 addresses
 	for (const auto& ipV6Address : ipV6Addresses)
 	{
-		if (!writter.Assert(24))
+		//Check parameter length
+		size_t len = 24;
+		if (!writter.Assert(len))
 			return 0;
 		//Write it
 		writter.Set2(Parameter::IPv6Address);
-		writter.Set2(20+4);
+		writter.Set2(len);
 		writter.Set<20>(ipV6Address);
-		writter.PadTo(4);
+		//Pad input
+		if (!writter.PadTo(4))
+			return 0;
 	}
+	
+	//Cookie life span
 	if (suggestedCookieLifeSpanIncrement)
 	{
+		//Check parameter length
+		size_t len = 12;
+		if (!writter.Assert(len))
+			return 0;
 		//Write it
 		writter.Set2(Parameter::CookiePreservative);
-		writter.Set2(8+4);
+		writter.Set2(len);
 		writter.Set8(*suggestedCookieLifeSpanIncrement);
-		writter.PadTo(4);
+		//Pad input
+		if (!writter.PadTo(4))
+			return 0;
 	}
+	
+	//Optional Host name
 	if (hostName)
 	{
-		if (!writter.Assert(8+hostName->length()))
+		//Check parameter length
+		size_t len = 4+hostName->length();
+		if (!writter.Assert(len))
 			return 0;
 		//Write it
 		writter.Set2(Parameter::HostNameAddress);
-		writter.Set2(hostName->length()+4);
+		writter.Set2(len);
 		writter.Set(*hostName);
-		writter.PadTo(4);
+		//Pad input
+		if (!writter.PadTo(4))
+			return 0;
 	}
+	
+	//Supported extensions parameter
 	if (supportedAddressTypes.size())
 	{
-		if (!writter.Assert(supportedAddressTypes.size()*2+4))
+		//Check parameter length
+		size_t len = 4+supportedAddressTypes.size()*2;
+		if (!writter.Assert(len))
 			return 0;
 		//Write it
 		writter.Set2(Parameter::SupportedAddressTypes);
-		writter.Set2(supportedAddressTypes.size()*2+4);
+		writter.Set2(len);
 		for (const auto& supportedAddressType : supportedAddressTypes)
 			writter.Set2(supportedAddressType);
-		writter.PadTo(4);
+		//Pad input
+		if (!writter.PadTo(4))
+			return 0;
 	}
+	
+	//Supported extensions parameter
 	if (supportedExtensions.size())
 	{
-		if (!writter.Assert(supportedExtensions.size()+4))
+		//Check parameter length
+		size_t len = 4+supportedExtensions.size();
+		if (!writter.Assert(len))
 			return 0;
 		//Write it
 		writter.Set2(Parameter::SupportedExtensions);
-		writter.Set2(supportedExtensions.size()+4);
+		writter.Set2(len);
 		for (const auto& supportedExtension : supportedExtensions)
 			writter.Set1(supportedExtension);
-		writter.PadTo(4);
+		//Pad input
+		if (!writter.PadTo(4))
+			return 0;
 	}
+	
+	//Unknown parameters
 	for (const auto& unknownParameter : unknownParameters)
 	{
-		if (!writter.Assert(unknownParameter.second.GetSize()+4))
+		//Check parameter length
+		size_t len = 4+unknownParameter.second.GetSize();
+		if (!writter.Assert(len))
 			return 0;
 		//Write it
 		writter.Set2(unknownParameter.first);
-		writter.Set2(unknownParameter.second.GetSize()+4);
+		writter.Set2(len);
 		writter.Set(unknownParameter.second);
-		writter.PadTo(4);
+		//Pad input
+		if (!writter.PadTo(4))
+			return 0;
 	}
+	
+	//Support for ForwardTSN
 	if (forwardTSNSupported)
 	{
-		if (!writter.Assert(4))
+		//Check parameter length
+		size_t len = 4;;
+		if (!writter.Assert(len))
 			return 0;
 		//Write it
 		writter.Set2(Parameter::ForwardTSNSupported);
-		writter.Set2(4);
-		writter.PadTo(4);
+		writter.Set2(len);
+		//Pad input
+		if (!writter.PadTo(4))
+			return 0;
 	}
 	
 	//Get length
@@ -168,11 +218,13 @@ Chunk::shared InitiationChunk::Parse(BufferReader& reader)
 		uint16_t paramLength = reader.Get2();
 		//Ensure lenghth is correct as it has to contain the type and length itself
 		if (paramLength<4)
-			throw new std::runtime_error("Wrong parameter length");
+			return nullptr;
+		//Remove header
+		paramLength-=4;
 		//Ensure we have enought length
-		if (!reader.Assert(paramLength-4)) return nullptr;
+		if (!reader.Assert(paramLength)) return nullptr;
 		//Get reader for the param length
-		BufferReader paramReader = reader.GetReader(paramLength-4);
+		BufferReader paramReader = reader.GetReader(paramLength);
 		//Depending on the parameter type
 		switch(paramType)
 		{
@@ -202,6 +254,12 @@ Chunk::shared InitiationChunk::Parse(BufferReader& reader)
 			case Parameter::ForwardTSNSupported:
 				init->forwardTSNSupported = true;
 				break;
+			case Parameter::Padding:
+				//The PAD parameter MAY be included only in the INIT chunk.  It MUST
+				//NOT be included in any other chunk.  The receiver of the PAD
+				//parameter MUST silently discard this parameter and continue
+				//processing the rest of the INIT chunk.
+				reader.Skip(reader.GetLeft());
 			default:
 				//Unkonwn
 				init->unknownParameters.push_back(std::make_pair<uint8_t,Buffer>(paramType,paramReader.GetBuffer(paramReader.GetLeft())));

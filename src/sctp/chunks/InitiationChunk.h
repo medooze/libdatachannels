@@ -19,7 +19,7 @@ public:
 	
 	virtual size_t Serialize(BufferWritter& buffer) const override;
 	virtual size_t GetSize() const override;
-	
+
 	static Chunk::shared Parse(BufferReader& reader);
 public:	
 	//	0                   1                   2                   3
