@@ -5,8 +5,6 @@
 #include <random>
 #include <crc32c/crc32c.h>
 
-using namespace std::chrono_literals;
-
 namespace sctp
 {
 	
@@ -14,8 +12,6 @@ namespace sctp
 std::random_device rd;
 std::mt19937 gen{rd()};
 std::uniform_int_distribution<unsigned long> dis{1, 4294967295};
-
-#define MaxInitRetransmits 10
 
 Association::Association(datachannels::TimeService& timeService) :
 	timeService(timeService)
@@ -70,14 +66,14 @@ bool Association::Associate()
 	init->supportedExtensions.push_back(Chunk::Type::RE_CONFIG);
 		
 	//Set timer
-	initTimer = timeService.CreateTimer(100ms,[&](...){
+	initTimer = timeService.CreateTimer(InitRetransmitTimeout,[=](...){
 		//Retransmit init chunk
 		if (initRetransmissions++<MaxInitRetransmits)
 		{
 			//Enquee
 			Enqueue(std::static_pointer_cast<Chunk>(init));
 			//Retry again
-			initTimer->Again(100ms);
+			initTimer->Again(InitRetransmitTimeout);
 		} else {
 			//Close
 			SetState(State::Closed);
@@ -161,35 +157,36 @@ size_t Association::ReadPacket(uint8_t *data, uint32_t size)
 	{
 		//Get chunk
 		auto chunk = *it;
-		//Check if it must be sent alone
-		if (chunk->type==Chunk::Type::INIT || chunk->type==Chunk::Type::INIT_ACK || chunk->type==Chunk::Type::COOKIE_ECHO)
-		{
-			//Ensure it is the first
-			if (!num)
-				//Flush all before this
-				break;
-		}
-		//Ensure we have enought space for chunk anc crc
-		if (writter.GetLeft()>chunk->GetSize()+4)
+
+		//Ensure we have enought space for chunk
+		if (writter.GetLeft()<chunk->GetSize())
 			//We cant send more on this packet
 			break;
 		
+		//Check if it must be sent alone
+		if (chunk->type==Chunk::Type::INIT || chunk->type==Chunk::Type::INIT_ACK || chunk->type==Chunk::Type::COOKIE_ECHO)
+		{
+			//IF it is not firest
+			if (num)
+				//Flush all before this
+				break;
+		}
+		
 		//Remove from queue and move to next chunk
-		queue.erase(++it);
+		it = queue.erase(it);
+		
 		//Serialize chunk
 		chunk->Serialize(writter);
-		//Add chunk
-		num++;
-
+		
+		//Check if it must be sent alone
+		if (chunk->type==Chunk::Type::INIT || chunk->type==Chunk::Type::INIT_ACK || chunk->type==Chunk::Type::COOKIE_ECHO)
+			//Send alone
+			break;
 	}
 
-	//TODO:Now fill data chunks from streams
+	//TODO:Check in which stata data can be sent
+		//TODO:Now fill data chunks from streams
 
-	//Ensure we can add crc
-	if (!writter.Assert(4))
-		//Error
-		return 0;
-	
 	//Get length
 	size_t length = writter.GetLength();
 	//Calculate crc
@@ -333,7 +330,7 @@ void Association::Process(const Chunk::shared& chunk)
 					initRetransmissions = 0;
 					
 					//Set timer
-					cookieEchoTimer = timeService.CreateTimer(100ms,[&](...){
+					cookieEchoTimer = timeService.CreateTimer(100ms,[=](...){
 						
 						//3)  If the T1-cookie timer expires, the endpoint MUST retransmit
 						//    COOKIE ECHO and restart the T1-cookie timer without changing
@@ -435,7 +432,7 @@ void Association::Enqueue(const Chunk::shared& chunk)
 	//Push back
 	queue.push_back(chunk);
 	//Reset flag
-	pendingData = false;
+	pendingData = true;
 	//If it is first
 	if (!wasPending && onPendingData)
 		//Call callback

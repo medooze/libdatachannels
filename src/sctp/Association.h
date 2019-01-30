@@ -8,6 +8,8 @@
 #include "BufferWritter.h"
 #include "BufferReader.h"
 
+using namespace std::chrono_literals;
+
 namespace sctp
 {
 	
@@ -37,14 +39,31 @@ public:
 	void SetRemotePort(uint16_t port) 	{ remotePort = port;	}
 	uint16_t GetLocalPort() const 		{ return localPort;	}
 	uint16_t GetRemotePort() const		{ return remotePort;	}
+	State GetState() const			{ return state;		}
+	bool HasPendingData() const		{ return pendingData;	}
 	
+	  
 	virtual size_t ReadPacket(uint8_t *data, uint32_t size) override;
 	virtual size_t WritePacket(uint8_t *data, uint32_t size) override;
+	
+	inline size_t ReadPacket(Buffer& buffer)
+	{
+		size_t len = ReadPacket(buffer.GetData(),buffer.GetCapacity());
+		buffer.SetSize(len);
+		return len;
+	}
+	inline size_t WritePacket(Buffer& buffer)
+	{
+		return WritePacket(buffer.GetData(),buffer.GetSize());
+	}
 	
 	virtual void OnPendingData(std::function<void(void)> callback) override
 	{
 		onPendingData = callback;
 	}
+	
+	static constexpr const size_t MaxInitRetransmits = 10;
+	static constexpr const std::chrono::milliseconds InitRetransmitTimeout = 100ms;
 private:
 	void Process(const Chunk::shared& chunk);
 	void SetState(State state);
