@@ -16,27 +16,35 @@ inline int RoundUp(size_t alignment, size_t size)
 class Buffer
 {
 public:
-	Buffer(const uint8_t* data, const size_t size)
-	{
-		//Set buffer size to a 
-		capacity = RoundUp(64,size);
-		//Allocate memory
-		buffer = (uint8_t*) std::aligned_alloc(64, this->capacity);
-		//Copy
-		memcpy(buffer,data,size);
-		//Reset size
-		this->size = size;
-	}
-	
-	Buffer(size_t capacity = 0)
-	{
-		//Set buffer size
-		this->capacity = capacity ? RoundUp(64,capacity) : 0;
-		//Allocate memory
-		buffer = capacity ? (uint8_t*) std::aligned_alloc(64, this->capacity) : nullptr;
-		//NO size
-		this->size = 0;
-	}
+        Buffer(const uint8_t* data, const size_t size)
+        {
+                //Set buffer size to a
+                capacity = RoundUp(64,size);
+                //Allocate memory
+#ifdef HAVE_STD_ALIGNED_ALLOC
+                buffer = (uint8_t*) std::aligned_alloc(64, this->capacity);
+#else
+                buffer = (uint8_t*) std::malloc(this->capacity);
+#endif
+                //Copy
+                memcpy(buffer,data,size);
+                //Reset size
+                this->size = size;
+        }
+
+        Buffer(size_t capacity = 0)
+        {
+                //Set buffer size
+                this->capacity = capacity ? RoundUp(64,capacity) : 0;
+#ifdef HAVE_STD_ALIGNED_ALLOC
+                //Allocate memory
+                buffer = capacity ? (uint8_t*) std::aligned_alloc(64, this->capacity) : nullptr;
+#else
+                buffer = capacity ? (uint8_t*) std::malloc(this->capacity) : nullptr;
+#endif
+                //NO size
+                this->size = 0;
+        }
 	
 	Buffer(Buffer &&other)
 	{

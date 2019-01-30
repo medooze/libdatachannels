@@ -21,5 +21,6 @@
 #include "sctp/chunks/ShutdownAssociationChunk.cpp"
 #include "sctp/chunks/ForwardCumulativeTSNChunk.cpp"
 #include "sctp/chunks/UnknownChunk.cpp"
+#include "sctp/chunks/PaddingChunk.cpp"
 
 
