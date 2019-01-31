@@ -139,6 +139,11 @@ size_t Association::WritePacket(uint8_t *data, uint32_t size)
 
 size_t Association::ReadPacket(uint8_t *data, uint32_t size)
 {
+	//Check there is pending data
+	if (!pendingData)
+		//Nothing to do
+		return 0;
+	
 	//Create buffer writter
 	BufferWritter writter(data,size);
 	

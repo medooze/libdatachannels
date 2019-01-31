@@ -28,6 +28,15 @@ TEST_F(SCTP, AssociationInit)
 	ASSERT_EQ(association.HasPendingData(),false);
 }
 
+TEST_F(SCTP, AssociationEmptyRead)
+{
+	Buffer buffer(1500);
+	FakeTimeService timeService;
+	sctp::Association association(timeService);
+	ASSERT_EQ(association.HasPendingData(),false);
+	ASSERT_FALSE(association.ReadPacket(buffer));
+}
+
 TEST_F(SCTP, AssociationAssociate)
 {
 	FakeTimeService timeService;
