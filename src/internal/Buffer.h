@@ -131,10 +131,9 @@ public:
 		this->size += size;
 	}
 	
-	Buffer&& Clone() const
+	Buffer Clone() const
 	{
-		Buffer clone(buffer,size);
-		return std::move(clone);
+		return Buffer(buffer,size);
 	}
 	
 	static Buffer&& Wrap(uint8_t* data, size_t size)

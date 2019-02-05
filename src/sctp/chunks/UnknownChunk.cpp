@@ -11,6 +11,9 @@ size_t UnknownChunk::GetSize() const
 
 size_t UnknownChunk::Serialize(BufferWritter& writter) const
 {
+	//Get init pos
+	size_t ini = writter.Mark();
+	
 	//Check header length
 	if (!writter.Assert(4))
 		return 0;
@@ -30,7 +33,7 @@ size_t UnknownChunk::Serialize(BufferWritter& writter) const
 	writter.Set(buffer);
 	
 	//Get length
-	size_t length = writter.GetLength();
+	size_t length = writter.GetOffset(ini);
 	//Set it
 	writter.Set2(mark,length);
 	

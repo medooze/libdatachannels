@@ -14,6 +14,9 @@ size_t ShutdownCompleteChunk::GetSize() const
 
 size_t ShutdownCompleteChunk::Serialize(BufferWritter& writter) const
 {
+	//Get init pos
+	size_t ini = writter.Mark();
+	
 	//Write header
 	writter.Set1(type);
 	writter.Set1(0);
@@ -23,7 +26,7 @@ size_t ShutdownCompleteChunk::Serialize(BufferWritter& writter) const
 	
 	
 	//Get length
-	size_t length = writter.GetLength();
+	size_t length = writter.GetOffset(ini);
 	//Set it
 	writter.Set2(mark,length);
 	

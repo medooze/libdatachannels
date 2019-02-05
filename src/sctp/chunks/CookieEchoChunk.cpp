@@ -18,6 +18,9 @@ size_t CookieEchoChunk::Serialize(BufferWritter& writter) const
 	if (!writter.Assert(4))
 		return 0;
 	
+	//Get init pos
+	size_t ini = writter.Mark();
+	
 	//Write header
 	writter.Set1(type);
 	writter.Set1(flag);
@@ -33,7 +36,7 @@ size_t CookieEchoChunk::Serialize(BufferWritter& writter) const
 	writter.Set(cookie);
 	
 	//Get length
-	size_t length = writter.GetLength();
+	size_t length = writter.GetOffset(ini);
 	//Set it
 	writter.Set2(mark,length);
 	

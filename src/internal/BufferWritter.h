@@ -36,6 +36,7 @@ public:
 	inline size_t Set4(uint32_t val)  { Set4(pos,val); return pos+=4; }
 	inline size_t Set6(uint64_t val)  { Set6(pos,val); return pos+=6; }
 	inline size_t Set8(uint64_t val)  { Set8(pos,val); return pos+=8; }
+	inline size_t Set4Reversed(uint32_t val)  { Set4Reversed(pos,val); return pos+=4; }
 	
 	
 	template<std::size_t N> 
@@ -78,6 +79,14 @@ public:
 		data[i+2] = (uint8_t)(val>>8);
 		data[i+1] = (uint8_t)(val>>16);
 		data[i]   = (uint8_t)(val>>24);
+	}
+	
+	inline void Set4Reversed(size_t i, uint32_t val)
+	{
+		data[i] = (uint8_t)(val);
+		data[i+1] = (uint8_t)(val>>8);
+		data[i+2] = (uint8_t)(val>>16);
+		data[i+3]   = (uint8_t)(val>>24);
 	}
 
 	inline void Set6(size_t i, uint64_t val)

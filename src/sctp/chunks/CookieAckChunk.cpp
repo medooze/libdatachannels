@@ -14,6 +14,9 @@ size_t CookieAckChunk::GetSize() const
 
 size_t CookieAckChunk::Serialize(BufferWritter& writter) const
 {
+	//Get init pos
+	size_t ini = writter.Mark();
+	
 	//Write header
 	writter.Set1(type);
 	writter.Set1(flag);
@@ -21,7 +24,7 @@ size_t CookieAckChunk::Serialize(BufferWritter& writter) const
 	size_t mark = writter.Skip(2);
 	
 	//Get length
-	size_t length = writter.GetLength();
+	size_t length = writter.GetOffset(ini);
 	//Set it
 	writter.Set2(mark,length);
 	

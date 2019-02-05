@@ -116,7 +116,7 @@ size_t Association::WritePacket(uint8_t *data, uint32_t size)
 		return false;
 
 	//Check correct local and remote port
-	if (header->sourcePortNumber!=remotePort || header->destinationPortNumber!=localPort || header->verificationTag==localVerificationTag)
+	if (header->sourcePortNumber!=remotePort || header->destinationPortNumber!=localPort || header->verificationTag!=localVerificationTag)
 		//Error
 		return false;
 	

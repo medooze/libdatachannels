@@ -14,6 +14,9 @@ size_t PaddingChunk::Serialize(BufferWritter& writter) const
 	//Check header length
 	if (!writter.Assert(4))
 		return 0;
+
+	//Get init pos
+	size_t ini = writter.Mark();
 	
 	//Write header
 	writter.Set1(type);
@@ -30,7 +33,7 @@ size_t PaddingChunk::Serialize(BufferWritter& writter) const
 	writter.Set(buffer);
 	
 	//Get length
-	size_t length = writter.GetLength();
+	size_t length = writter.GetOffset(ini);
 	//Set it
 	writter.Set2(mark,length);
 	

@@ -20,7 +20,7 @@ PacketHeader::shared PacketHeader::Parse(BufferReader& reader)
 	uint16_t sourcePortNumber	= reader.Get2();
 	uint16_t destinationPortNumber	= reader.Get2();
 	uint32_t verificationTag	= reader.Get4();
-	uint32_t checksum		= reader.Get4();
+	uint32_t checksum		= reader.Get4Reversed();
 	
 	//Create PacketHeader
 	auto header = std::make_shared<PacketHeader>(sourcePortNumber,destinationPortNumber,verificationTag,checksum);
@@ -44,7 +44,7 @@ size_t PacketHeader::Serialize(BufferWritter& writter) const
 	writter.Set2(sourcePortNumber);
 	writter.Set2(destinationPortNumber);
 	writter.Set4(verificationTag);
-	writter.Set4(checksum);
+	writter.Set4Reversed(checksum);
 	
 	//Done
 	return writter.GetLength();

@@ -66,6 +66,10 @@ public:
 	{
 		return (uint32_t)(data[i+3]) | ((uint32_t)(data[i+2]))<<8 | ((uint32_t)(data[i+1]))<<16 | ((uint32_t)(data[i]))<<24; 
 	}
+	inline uint32_t Get4Reversed(size_t i) const 
+	{
+		return (uint32_t)(data[i]) | ((uint32_t)(data[i+1]))<<8 | ((uint32_t)(data[i+2]))<<16 | ((uint32_t)(data[i+3]))<<24; 
+	}
 	
 	inline uint64_t Get8(size_t i) const 
 	{
@@ -81,6 +85,7 @@ public:
 	inline uint16_t Get2() 				{ auto val = Get2(pos); pos+=2; return val;	}
 	inline uint32_t Get3() 				{ auto val = Get3(pos); pos+=3; return val;	}
 	inline uint32_t Get4() 				{ auto val = Get4(pos); pos+=4; return val;	}
+	inline uint32_t Get4Reversed()			{ auto val = Get4Reversed(pos); pos+=4; return val;	}
 	inline uint64_t Get8() 				{ auto val = Get8(pos); pos+=8; return val;	}
 	inline uint8_t  Peek1()				{ return Get1(pos); }
 	inline uint16_t Peek2()				{ return Get2(pos); }
