@@ -73,7 +73,7 @@ public:
 	
 	~Buffer()
 	{
-		std::free(buffer);
+		if (buffer) std::free(buffer);
 	}
 	
 	uint8_t* GetData() const		{ return buffer;		}
