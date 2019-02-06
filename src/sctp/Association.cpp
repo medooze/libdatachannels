@@ -195,7 +195,7 @@ size_t Association::ReadPacket(uint8_t *data, uint32_t size)
 	//Get length
 	size_t length = writter.GetLength();
 	//Calculate crc
-	header.checksum  = crc32c::Extend(0,data,length);
+	header.checksum  = crc32c::Crc32c(data,length);
 	//Go to the begining
 	writter.GoTo(0);
 	

@@ -5,11 +5,8 @@ namespace sctp
 	
 size_t CookieEchoChunk::GetSize() const
 {
-	//Header + attributes
-	size_t size = 20;
-	
-	//Done
-	return size;
+	//Header + cookie
+	return SizePad(4,4+cookie.GetSize());
 }
 
 size_t CookieEchoChunk::Serialize(BufferWritter& writter) const
@@ -23,7 +20,7 @@ size_t CookieEchoChunk::Serialize(BufferWritter& writter) const
 	
 	//Write header
 	writter.Set1(type);
-	writter.Set1(flag);
+	writter.Set1(0);	// Always 0
 	
 	//Skip length position
 	size_t mark = writter.Skip(2);

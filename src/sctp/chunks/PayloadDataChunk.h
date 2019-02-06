@@ -35,9 +35,10 @@ public:
 	//       /                 User Data (seq n of Stream S)                 /
 	//       \                                                               \
 	//       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+	
+	bool unordered				= false;
 	bool beginingFragment			= false;
 	bool endingFragment			= false;
-	uint16_t length				= 0;
+	uint16_t transmissionSequenceNumner     = 0;
 	uint16_t streamIdentifier		= 0;
 	uint16_t streamSequenceNumber		= 0;
 	uint32_t payloadProtocolIdentifier	= 0;

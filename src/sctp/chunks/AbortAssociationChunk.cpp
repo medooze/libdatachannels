@@ -23,8 +23,6 @@ size_t AbortAssociationChunk::Serialize(BufferWritter& writter) const
 	//Skip length position
 	size_t mark = writter.Skip(2);
 	
-	
-	
 	//Get length
 	size_t length = writter.GetOffset(ini);
 	//Set it

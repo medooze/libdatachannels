@@ -21,31 +21,32 @@ TEST_F(Chunks, ParseInit)
 	uint8_t data[100] = {
 	   0x13, 0x88, 0x13, 0x88,
 	   0x00, 0x00, 0x00, 0x00,
-	   0xdf, 0x9d, 0x5e, 0x22,
+	   0xfc, 0x36, 0x40, 0x87,
 	   0x01, 0x00, 0x00, 0x56,
-	   0xff, 0x55, 0x39, 0x12,
+	   0xd2, 0xc0, 0x87, 0x0e,
 	   0x00, 0x02, 0x00, 0x00,
 	   0x04, 0x00, 0x08, 0x00,
-	   0xce, 0x91, 0x30, 0x32,
+	   0x18, 0xc1, 0x16, 0x32,
 	   0xc0, 0x00, 0x00, 0x04,
 	   0x80, 0x08, 0x00, 0x09,
 	   0xc0, 0x0f, 0xc1, 0x80,
 	   0x82, 0x00, 0x00, 0x00,
 	   0x80, 0x02, 0x00, 0x24,
-	   0xf1, 0x77, 0x00, 0x00,
-	   0x51, 0x0a, 0x00, 0x00,
-	   0xba, 0x21, 0x00, 0x00,
-	   0xd2, 0x39, 0x00, 0x00,
-	   0xc2, 0x38, 0x00, 0x00,
-	   0xbb, 0x7f, 0x00, 0x00,
-	   0x25, 0x53, 0x00, 0x00,
-	   0xd8, 0x44, 0x00, 0x00,
+	   0x83, 0x52, 0x00, 0x00,
+	   0xe3, 0x60, 0x00, 0x00,
+	   0xf6, 0x1a, 0x00, 0x00,
+	   0xd4, 0x07, 0x00, 0x00,
+	   0xe4, 0x4f, 0x00, 0x00,
+	   0xe6, 0x6b, 0x00, 0x00,
+	   0xbd, 0x1a, 0x00, 0x00,
+	   0x52, 0x27, 0x00, 0x00,
 	   0x80, 0x04, 0x00, 0x06,
 	   0x00, 0x01, 0x00, 0x00,
 	   0x80, 0x03, 0x00, 0x06,
+	   0x80, 0xc1, 0x00, 0x00
 	};
 	
-	BufferReader reader(data,100);
+	BufferReader reader(data,sizeof(data));
 	
 	auto header = sctp::PacketHeader::Parse(reader);
 	ASSERT_TRUE(header);
@@ -95,11 +96,58 @@ TEST_F(Chunks, SerializeInit)
 	
 }
 
+
+
+TEST_F(Chunks, ParseInitAck)
+{
+	
+	//INIT ACK
+	uint8_t data[104] = {
+	   0x13, 0x88, 0x13, 0x88,
+	   0x29, 0x8f, 0x32, 0x21,
+	   0xe9, 0x62, 0xaf, 0xbf,
+	   0x02, 0x00, 0x00, 0x5c,
+	   0xa1, 0x50, 0x72, 0xdd,
+	   0xff, 0xff, 0xff, 0xff,
+	   0xff, 0xff, 0xff, 0xff,
+	   0x00, 0x00, 0x00, 0x00,
+	   0x00, 0x07, 0x00, 0x08,
+	   0x64, 0x74, 0x6c, 0x73,
+	   0x00, 0x08, 0x00, 0x24,
+	   0x12, 0x52, 0x00, 0x00,
+	   0xc8, 0x6f, 0x00, 0x00,
+	   0x16, 0x3f, 0x00, 0x00,
+	   0x8a, 0x3c, 0x00, 0x00,
+	   0x0b, 0x14, 0x00, 0x00,
+	   0x21, 0x28, 0x00, 0x00,
+	   0x82, 0x3d, 0x00, 0x00,
+	   0x24, 0x64, 0x00, 0x00,
+	   0x00, 0x08, 0x00, 0x06,
+	   0x00, 0x01, 0x00, 0x00,
+	   0x00, 0x08, 0x00, 0x06,
+	   0x80, 0xc1, 0x00, 0x00,
+	   0x80, 0x08, 0x00, 0x05,
+	   0x82, 0x00, 0x00, 0x00,
+	   0xc0, 0x00, 0x00, 0x04
+	};
+	
+	BufferReader reader(data,sizeof(data));
+	
+	auto header = sctp::PacketHeader::Parse(reader);
+	ASSERT_TRUE(header);
+	auto chunk = sctp::Chunk::Parse(reader);
+	ASSERT_TRUE(chunk);
+	ASSERT_EQ(chunk->type,sctp::Chunk::INIT_ACK);
+	ASSERT_FALSE(reader.GetLeft());
+
+}
+
 TEST_F(Chunks, SerializeInitAck)
 {
 	Buffer buffer(1200);
 	uint8_t cookie[5] = {0,1,2,3,4};
-	
+	Buffer unknown(4);
+
 	//Create chunk
 	sctp::InitiationAcknowledgementChunk ack;
 	ack.advertisedReceiverWindowCredit = 6500;
@@ -109,7 +157,7 @@ TEST_F(Chunks, SerializeInitAck)
 	ack.supportedExtensions = {3,4,5,6,7};
 	ack.stateCookie.SetData(cookie,sizeof(cookie));
 	ack.forwardTSNSupported = true;
-	
+	ack.unrecognizedParameters.push_back(unknown.Clone());
 	//Serialize
 	BufferWritter writter(buffer);
 	size_t len = ack.Serialize(writter);
@@ -133,6 +181,29 @@ TEST_F(Chunks, SerializeInitAck)
 	
 }
 
+
+TEST_F(Chunks, ParseCookieEcho)
+{
+	
+	//COOKIE
+	uint8_t data[20] = {
+	   0x13, 0x88, 0x13, 0x88,
+	   0xa1, 0x50, 0x72, 0xdd,
+	   0xe0, 0x33, 0x22, 0xa8,
+	   0x0a, 0x00, 0x00, 0x08,
+	   0x64, 0x74, 0x6c, 0x73
+	};
+	
+	BufferReader reader(data,sizeof(data));
+	
+	auto header = sctp::PacketHeader::Parse(reader);
+	ASSERT_TRUE(header);
+	auto chunk = sctp::Chunk::Parse(reader);
+	ASSERT_TRUE(chunk);
+	ASSERT_EQ(chunk->type,sctp::Chunk::COOKIE_ECHO);
+	ASSERT_FALSE(reader.GetLeft());
+
+}
 
 TEST_F(Chunks, SerializeCookieEcho)
 {
@@ -160,6 +231,29 @@ TEST_F(Chunks, SerializeCookieEcho)
 }
 
 
+
+TEST_F(Chunks, ParseCookieAck)
+{
+
+	//COOKIE ECHO
+	uint8_t data[16] = {
+	   0x13, 0x88, 0x13, 0x88,
+	   0x29, 0x8f, 0x32, 0x21,
+	   0x4d, 0xdf, 0xef, 0x0b,
+	   0x0b, 0x00, 0x00, 0x04
+	};
+
+	BufferReader reader(data,sizeof(data));
+	
+	auto header = sctp::PacketHeader::Parse(reader);
+	ASSERT_TRUE(header);
+	auto chunk = sctp::Chunk::Parse(reader);
+	ASSERT_TRUE(chunk);
+	ASSERT_EQ(chunk->type,sctp::Chunk::COOKIE_ACK);
+	ASSERT_FALSE(reader.GetLeft());
+
+}
+
 TEST_F(Chunks, SerializeCookieAck)
 {
 	Buffer buffer(1200);
@@ -182,6 +276,21 @@ TEST_F(Chunks, SerializeCookieAck)
 	ASSERT_TRUE(ack2);
 	
 }
+
+//
+//TEST_F(Chunks, SparseHeartbeatRequest)
+//{
+//	
+//	BufferReader reader(data,sizeof(data));
+//	
+//	auto header = sctp::PacketHeader::Parse(reader);
+//	ASSERT_TRUE(header);
+//	auto chunk = sctp::Chunk::Parse(reader);
+//	ASSERT_TRUE(chunk);
+//	ASSERT_EQ(chunk->type,sctp::Chunk::INIT);
+//	ASSERT_FALSE(reader.GetLeft());
+//
+//}
 
 TEST_F(Chunks, SerializeHeartbeatRequest)
 {
@@ -207,6 +316,20 @@ TEST_F(Chunks, SerializeHeartbeatRequest)
 	auto heartbeat2 = std::static_pointer_cast<sctp::HeartbeatRequestChunk>(chunk);
 	ASSERT_EQ(heartbeat2->senderSpecificHearbeatInfo.GetSize()	,heartbeat.senderSpecificHearbeatInfo.GetSize());
 }
+//
+//TEST_F(Chunks, ParseHeartbeatAck)
+//{
+//	
+//	BufferReader reader(data,sizeof(data));
+//	
+//	auto header = sctp::PacketHeader::Parse(reader);
+//	ASSERT_TRUE(header);
+//	auto chunk = sctp::Chunk::Parse(reader);
+//	ASSERT_TRUE(chunk);
+//	ASSERT_EQ(chunk->type,sctp::Chunk::INIT);
+//	ASSERT_FALSE(reader.GetLeft());
+//
+//}
 
 TEST_F(Chunks, SerializeHeartbeatAck)
 {
@@ -232,6 +355,19 @@ TEST_F(Chunks, SerializeHeartbeatAck)
 	auto heartbeat2 = std::static_pointer_cast<sctp::HeartbeatAckChunk>(chunk);
 	ASSERT_EQ(heartbeat2->senderSpecificHearbeatInfo.GetSize()	,heartbeat.senderSpecificHearbeatInfo.GetSize());
 }
+//
+//TEST_F(Chunks, ParsePadding)
+//{
+//	
+//	BufferReader reader(data,sizeof(data));
+//	
+//	auto header = sctp::PacketHeader::Parse(reader);
+//	ASSERT_TRUE(header);
+//	auto chunk = sctp::Chunk::Parse(reader);
+//	ASSERT_TRUE(chunk);
+//	ASSERT_EQ(chunk->type,sctp::Chunk::INIT);
+//	ASSERT_FALSE(reader.GetLeft());
+//}
 
 TEST_F(Chunks, SerializePadding)
 {
@@ -282,3 +418,36 @@ TEST_F(Chunks, SerializeUnknown)
 	auto unknown2 = std::static_pointer_cast<sctp::UnknownChunk>(chunk);
 	ASSERT_EQ(unknown2->buffer.GetSize()		,unknown.buffer.GetSize());
 }
+
+
+TEST_F(Chunks, ParsePayloadData)
+{
+	
+	//PDATA with datachannel open
+	uint8_t data[56] = {
+	   0x13, 0x88, 0x13, 0x88,
+	   0xa1, 0x50, 0x72, 0xdd,
+	   0x50, 0x4d, 0x63, 0x03,
+	   0x00, 0x03, 0x00, 0x2c,
+	   0x54, 0xb0, 0x12, 0xb4,
+	   0x00, 0x00, 0x00, 0x00,
+	   0x00, 0x00, 0x00, 0x32,
+	   0x03, 0x00, 0x00, 0x00,
+	   0x00, 0x00, 0x00, 0x00,
+	   0x00, 0x10, 0x00, 0x00,
+	   0x61, 0x61, 0x61, 0x61,
+	   0x61, 0x61, 0x61, 0x61,
+	   0x61, 0x61, 0x61, 0x61,
+	   0x61, 0x61, 0x61, 0x61
+	};
+	BufferReader reader(data,sizeof(data));
+	
+	auto header = sctp::PacketHeader::Parse(reader);
+	ASSERT_TRUE(header);
+	auto chunk = sctp::Chunk::Parse(reader);
+	ASSERT_TRUE(chunk);
+	ASSERT_EQ(chunk->type,sctp::Chunk::PDATA);
+	ASSERT_FALSE(reader.GetLeft());
+
+}
+
