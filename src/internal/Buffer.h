@@ -10,7 +10,7 @@
 //Allingment must be a power of 2
 inline int RoundUp(size_t alignment, size_t size) 
 {
-   return (size + alignment - 1) & -alignment;
+   return size ? (size + alignment - 1) & -alignment : 0;
 }
 
 class Buffer
@@ -35,7 +35,7 @@ public:
         Buffer(size_t capacity = 0)
         {
                 //Set buffer size
-                this->capacity = capacity ? RoundUp(64,capacity) : 0;
+                this->capacity = RoundUp(64,capacity);
 #ifdef HAVE_STD_ALIGNED_ALLOC
                 //Allocate memory
                 buffer = capacity ? (uint8_t*) std::aligned_alloc(64, this->capacity) : nullptr;
@@ -58,6 +58,7 @@ public:
 	
 	Buffer& operator=(Buffer&& other) 
 	{
+		if (this->buffer) std::free(this->buffer);
 		this->capacity = other.capacity;
 		this->buffer = other.buffer;
 		this->size = other.size;
