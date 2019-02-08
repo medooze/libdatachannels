@@ -11,12 +11,13 @@
 #include "FakeTimeService.h"
 #include "sctp/Association.h"
 
-class SCTP : public testing::Test
+class Association : public testing::Test
 {
 protected:
 };
 
-TEST_F(SCTP, AssociationInit)
+
+TEST_F(Association, Init)
 {
 	FakeTimeService timeService;
 	sctp::Association association(timeService);
@@ -28,7 +29,7 @@ TEST_F(SCTP, AssociationInit)
 	ASSERT_EQ(association.HasPendingData(),false);
 }
 
-TEST_F(SCTP, AssociationEmptyRead)
+TEST_F(Association, EmptyRead)
 {
 	Buffer buffer(1500);
 	FakeTimeService timeService;
@@ -37,7 +38,7 @@ TEST_F(SCTP, AssociationEmptyRead)
 	ASSERT_FALSE(association.ReadPacket(buffer));
 }
 
-TEST_F(SCTP, AssociationAssociate)
+TEST_F(Association, Associate)
 {
 	FakeTimeService timeService;
 	sctp::Association association(timeService);

@@ -1,7 +1,7 @@
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
 find_library(Crc32c REQUIRED)
-add_executable (gtests Chunks.cpp Association.cpp)
+add_executable (gtests Chunks.cpp Association.cpp SequenceNumberWrapper.cpp)
 target_link_libraries(gtests libdatachannels)
 target_link_libraries(gtests gtest gtest_main)
 target_link_libraries(gtests Threads::Threads)

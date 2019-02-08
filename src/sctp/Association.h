@@ -1,8 +1,11 @@
 #ifndef SCTP_ASSOCIATION_H_
 #define SCTP_ASSOCIATION_H_
 #include <list>
+#include <map>
+#include <set>
 
 #include "Datachannels.h"
+#include "sctp/SequenceNumberWrapper.h"
 #include "sctp/PacketHeader.h"
 #include "sctp/Stream.h"
 #include "BufferWritter.h"
@@ -15,6 +18,9 @@ namespace sctp
 	
 class Association : public datachannels::Transport
 {
+private:
+	using TransmissionSequenceNumberWrapper = SequenceNumberWrapper<uint32_t>;
+	static constexpr const uint64_t MaxTransmissionSequenceNumber = TransmissionSequenceNumberWrapper::MaxSequenceNumber;
 public:
 	enum State
 	{
@@ -63,11 +69,13 @@ public:
 	}
 	
 	static constexpr const size_t MaxInitRetransmits = 10;
-	static constexpr const std::chrono::milliseconds InitRetransmitTimeout = 100ms;
+	static constexpr const std::chrono::milliseconds InitRetransmitTimeout	= 100ms;
+	static constexpr const std::chrono::milliseconds SackTimeout		= 100ms;
 private:
 	void Process(const Chunk::shared& chunk);
 	void SetState(State state);
 	void Enqueue(const Chunk::shared& chunk);
+	void Acknowledge();
 private:
 	State state = State::Closed;
 	std::list<Chunk::shared> queue;
@@ -80,12 +88,21 @@ private:
 	uint32_t localVerificationTag = 0;
 	uint32_t remoteVerificationTag = 0;
 	uint32_t initRetransmissions = 0;
+	
+	bool pendingAcknowledge = false;
+	std::chrono::milliseconds pendingAcknowledgeTimeout = 0ms;
+	
 	datachannels::Timer::shared initTimer;
 	datachannels::Timer::shared cookieEchoTimer;
+	datachannels::Timer::shared sackTimer;
+	
+	size_t numberOfPacketsWithoutAcknowledge = 0;
+	TransmissionSequenceNumberWrapper receivedTransmissionSequenceNumberWrapper;
+	uint64_t lastReceivedTransmissionSequenceNumber = MaxTransmissionSequenceNumber;
 	
 	bool pendingData = false;
 	std::function<void(void)> onPendingData;
-	
+	std::multiset<uint64_t> receivedTransmissionSequenceNumbers;
 	std::map<uint16_t,Stream::shared> streams;
 };
 

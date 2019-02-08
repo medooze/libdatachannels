@@ -49,7 +49,8 @@ public:
 	//       |                       Duplicate TSN X                         |
 	//       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	
-	uint32_t cumulativeTrasnmissionSequenceNumberAck;
+	uint32_t cumulativeTrasnmissionSequenceNumberAck = 0;
+	uint32_t adveritsedReceiverWindowCredit = 0;
 	std::vector<std::pair<uint16_t,uint16_t>> gapAckBlocks;
 	std::vector<uint32_t> duplicateTuplicateTrasnmissionSequenceNumbers;
 };	

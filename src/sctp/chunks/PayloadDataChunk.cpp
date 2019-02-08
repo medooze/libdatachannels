@@ -28,9 +28,9 @@ size_t PayloadDataChunk::Serialize(BufferWritter& writter) const
 	size_t mark = writter.Skip(2);
 	
 	//Set attributes
-	writter.Set2(transmissionSequenceNumner);
+	writter.Set4(transmissionSequenceNumber);
 	writter.Set2(streamIdentifier);
-	writter.Set4(streamSequenceNumber);
+	writter.Set2(streamSequenceNumber);
 	writter.Set4(payloadProtocolIdentifier);
 
 	//Check user data size
@@ -76,7 +76,7 @@ Chunk::shared PayloadDataChunk::Parse(BufferReader& reader)
 	data->beginingFragment	= flag & 0x01;
 	
 	//Read params
-	data->transmissionSequenceNumner = reader.Get4();
+	data->transmissionSequenceNumber = reader.Get4();
 	data->streamIdentifier		 = reader.Get2();
 	data->streamSequenceNumber	 = reader.Get2();
 	data->payloadProtocolIdentifier	 = reader.Get4();
