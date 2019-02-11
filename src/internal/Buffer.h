@@ -46,7 +46,7 @@ public:
                 this->size = 0;
         }
 	
-	Buffer(Buffer &&other)
+	Buffer(Buffer &&other) noexcept
 	{
 		this->capacity = other.capacity;
 		this->buffer = other.buffer;
@@ -56,9 +56,9 @@ public:
 		other.size = 0;
 	}
 	
-	Buffer& operator=(Buffer&& other) 
+	Buffer& operator=(Buffer&& other) noexcept
 	{
-		if (this->buffer) std::free(this->buffer);
+		std::free(this->buffer);
 		this->capacity = other.capacity;
 		this->buffer = other.buffer;
 		this->size = other.size;
@@ -74,7 +74,7 @@ public:
 	
 	~Buffer()
 	{
-		if (buffer) std::free(buffer);
+		std::free(buffer);
 	}
 	
 	uint8_t* GetData() const		{ return buffer;		}
