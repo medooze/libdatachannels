@@ -127,7 +127,7 @@ public:
 			//Allocate new size
 			Alloc(this->size+size);
 		//Copy
-		std::memcpy(buffer+size,data,size);
+		std::memcpy(buffer+this->size,data,size);
 		//Increase size
 		this->size += size;
 	}
