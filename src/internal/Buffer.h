@@ -137,7 +137,7 @@ public:
 		return Buffer(buffer,size);
 	}
 	
-	static Buffer&& Wrap(uint8_t* data, size_t size)
+	static Buffer Wrap(uint8_t* data, size_t size)
 	{
 		Buffer buffer;
 		
@@ -145,7 +145,7 @@ public:
 		buffer.capacity = size;
 		buffer.size = size;
 		
-		return std::move(buffer);
+		return buffer;
 	}
 	
 protected:
