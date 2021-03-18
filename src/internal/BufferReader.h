@@ -46,7 +46,7 @@ public:
 	{
 		return Buffer(data+i,num);
 	}
-	
+
 	inline uint8_t Get1(size_t i) const 
 	{
 		return data[i];
@@ -77,22 +77,23 @@ public:
 	}
 
 	template<std::size_t N> 
-	std::array<uint8_t,N> Get() 			{ pos+=N; return Get<N>(pos-N);			}
-	inline BufferReader GetReader(size_t num) 	{ pos+=num; return GetReader(pos-num, num);	}
-	inline std::string  GetString(size_t num) 	{ pos+=num; return GetString(pos-num, num);	}
-	inline Buffer	    GetBuffer(size_t num)	{ pos+=num; return GetBuffer(pos-num,num);	}
-	inline uint8_t  Get1() 				{ auto val = Get1(pos); pos+=1; return val;	}
-	inline uint16_t Get2() 				{ auto val = Get2(pos); pos+=2; return val;	}
-	inline uint32_t Get3() 				{ auto val = Get3(pos); pos+=3; return val;	}
-	inline uint32_t Get4() 				{ auto val = Get4(pos); pos+=4; return val;	}
+	std::array<uint8_t,N> Get() 			{ pos+=N; return Get<N>(pos-N);				}
+	inline BufferReader GetReader(size_t num) 	{ pos+=num; return GetReader(pos-num, num);		}
+	inline std::string  GetString(size_t num) 	{ pos+=num; return GetString(pos-num, num);		}
+	inline Buffer	    GetBuffer(size_t num)	{ pos+=num; return GetBuffer(pos-num,num);		}
+	inline const uint8_t* GetData(size_t num)	{ const uint8_t* val = data+pos; pos+=num; return val;	}
+	inline uint8_t  Get1() 				{ auto val = Get1(pos); pos+=1; return val;		}
+	inline uint16_t Get2() 				{ auto val = Get2(pos); pos+=2; return val;		}
+	inline uint32_t Get3() 				{ auto val = Get3(pos); pos+=3; return val;		}
+	inline uint32_t Get4() 				{ auto val = Get4(pos); pos+=4; return val;		}
 	inline uint32_t Get4Reversed()			{ auto val = Get4Reversed(pos); pos+=4; return val;	}
-	inline uint64_t Get8() 				{ auto val = Get8(pos); pos+=8; return val;	}
+	inline uint64_t Get8() 				{ auto val = Get8(pos); pos+=8; return val;		}
 	inline uint8_t  Peek1()				{ return Get1(pos); }
 	inline uint16_t Peek2()				{ return Get2(pos); }
 	inline uint32_t Peek3()				{ return Get3(pos); }
 	inline uint32_t Peek4()				{ return Get4(pos); }
 	inline uint64_t Peek8()				{ return Get8(pos); }
-	
+	inline const uint8_t* PeekData()		{ return data+pos;  }
 	size_t   PadTo(size_t num)
 	{
 		size_t reminder = pos % num;
@@ -110,6 +111,31 @@ public:
 	size_t GetLength() const 		{ return pos;		}
 	size_t GetLeft() const 			{ return size-pos;	}
 	size_t GetSize() const 			{ return size;		}
+
+	uint64_t DecodeLev128() 
+	{
+		uint64_t val = 0;
+		uint32_t len = 0;
+		
+
+		//While we have data
+		while (GetLeft())
+		{
+			//Get curr value
+			uint64_t cur = Get1();
+
+			//We only read the 7 least significant bits of each byte
+			val |= (cur & 0x7f) << len;
+			len += 7;
+
+			// Most significant bit is 0, we're done
+			if ((cur & 0x80) == 0)
+				return val;
+		}
+
+		// If we got here, we read all bytes, but no one with 0 as MSB
+		return std::numeric_limits<uint64_t>::max();
+	}
 
 private:
 	const uint8_t* data;

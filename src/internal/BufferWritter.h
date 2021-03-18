@@ -110,6 +110,20 @@ public:
 		data[i+1] = (uint8_t)(val>>48);
 		data[i]   = (uint8_t)(val>>56);
 	}
+
+	inline int EncodeLeb128(uint32_t value) 
+	{
+		int size = 0;
+		while (value >= 0x80) 
+		{
+			Set1((value & 0x7F) | 0x80);
+			value >>= 7;
+			++size;
+		}
+		Set1(value);
+		++size;
+		return size;
+	}
 	
 	size_t PadTo(size_t num, uint8_t val = 0)
 	{

@@ -6,7 +6,6 @@
 #include <cstring>
 #include <utility>
 
-
 //Allingment must be a power of 2
 inline int RoundUp(size_t alignment, size_t size) 
 {
@@ -131,6 +130,18 @@ public:
 		//Increase size
 		this->size += size;
 	}
+
+	template<typename Reader>
+	void AppendData(Reader& reader, const size_t size)
+	{
+		AppendData(reader.GetData(size), size);
+	}
+
+	template<typename Reader>
+	void AppendData(Reader& reader)
+	{
+		AppendData(reader, reader.GetLeft());
+	}
 	
 	Buffer Clone() const
 	{
@@ -146,6 +157,11 @@ public:
 		buffer.size = size;
 		
 		return buffer;
+	}
+
+	void Reset()
+	{
+		size = 0;
 	}
 	
 protected:
