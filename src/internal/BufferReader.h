@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <string>
 #include <array>
+#include <limits>
 
 #include "Buffer.h"
 
