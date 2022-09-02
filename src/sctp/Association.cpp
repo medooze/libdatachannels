@@ -107,8 +107,6 @@ size_t Association::WritePacket(uint8_t *data, uint32_t size)
 	
 	//TODO: Check crc 
 	
-	
-	
 	//Parse packet header
 	auto header = PacketHeader::Parse(reader);
 
@@ -129,8 +127,8 @@ size_t Association::WritePacket(uint8_t *data, uint32_t size)
 		auto chunk = Chunk::Parse(reader);
 		//Check 
 		if (!chunk)
-			//Skip
-			continue;
+			//Error
+			return false;
 		//Process it
 		Process(chunk);
 	}
