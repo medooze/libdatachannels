@@ -55,7 +55,7 @@ Chunk::shared PaddingChunk::Parse(BufferReader& reader)
 	uint16_t length	= reader.Get2();
 	
 	//Check type
-	if (type!=Type::COOKIE_ECHO)
+	if (type!=Type::PAD)
 		//Error
 		return nullptr;
 		

@@ -48,7 +48,7 @@ Chunk::shared ShutdownAssociationChunk::Parse(BufferReader& reader)
 	uint16_t length	= reader.Get2();
 	
 	//Check type
-	if (type!=Type::INIT)
+	if (type!=Type::SHUTDOWN)
 		//Error
 		return nullptr;
 		

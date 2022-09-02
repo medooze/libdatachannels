@@ -48,7 +48,7 @@ Chunk::shared ForwardCumulativeTSNChunk::Parse(BufferReader& reader)
 	uint16_t length	= reader.Get2();
 	
 	//Check type
-	if (type!=Type::INIT)
+	if (type!=Type::FORWARD_CUMULATIVE_TSN)
 		//Error
 		return nullptr;
 		
