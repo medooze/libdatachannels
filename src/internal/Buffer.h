@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <utility>
+#include <memory>
 
 //Allingment must be a power of 2
 inline int RoundUp(size_t alignment, size_t size) 
@@ -14,6 +15,9 @@ inline int RoundUp(size_t alignment, size_t size)
 
 class Buffer
 {
+public:
+	using shared = std::shared_ptr<Buffer>;
+	using unique = std::unique_ptr<Buffer>;
 public:
         Buffer(const uint8_t* data, const size_t size)
         {
@@ -79,6 +83,8 @@ public:
 	uint8_t* GetData() const		{ return buffer;		}
 	size_t GetCapacity() const		{ return capacity;		}
 	size_t GetSize() const			{ return size;			}
+
+	bool IsEmpty() const			{ return !size;			}			
 
 	void SetSize(size_t size) 
 	{ 
