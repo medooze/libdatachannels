@@ -12,7 +12,7 @@
 class BufferReader
 {
 public:
-	BufferReader(Buffer& buffer)  :
+	BufferReader(const Buffer& buffer)  :
 		data(buffer.GetData()),
 		size(buffer.GetSize())
 	{
