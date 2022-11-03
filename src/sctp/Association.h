@@ -36,6 +36,7 @@ public:
 	};
 public:
 	Association(datachannels::TimeService& timeService);
+	virtual ~Association();
 	
 	bool Associate();
 	bool Shutdown();
@@ -76,6 +77,7 @@ private:
 	void SetState(State state);
 	void Enqueue(const Chunk::shared& chunk);
 	void Acknowledge();
+	void ResetTimers();
 private:
 	State state = State::Closed;
 	std::list<Chunk::shared> queue;

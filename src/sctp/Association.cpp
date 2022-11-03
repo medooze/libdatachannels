@@ -19,6 +19,38 @@ Association::Association(datachannels::TimeService& timeService) :
 {
 }
 
+Association::~Association()
+{
+	//Reset timers
+	ResetTimers();
+}
+
+void Association::ResetTimers()
+{
+	//Reset any pending timer
+	if (sackTimer)
+	{
+		//Cancel it
+		sackTimer->Cancel();
+		//Reset it
+		sackTimer = nullptr;
+	}
+	if (cookieEchoTimer)
+	{
+		//Cancel it
+		cookieEchoTimer->Cancel();
+		//Reset it
+		cookieEchoTimer = nullptr;
+	}
+	if (initTimer)
+	{
+		//Cancel it
+		initTimer->Cancel();
+		//Reset it
+		initTimer = nullptr;
+	}
+}
+
 void Association::SetState(State state)
 {
 	this->state = state;
@@ -92,11 +124,17 @@ bool Association::Associate()
 
 bool Association::Shutdown()
 {
+	//Reset timers
+	ResetTimers();
+	//TODO: Shutdown
 	return true;
 }
 
 bool Association::Abort()
 {
+	//Reset timers
+	ResetTimers();
+	//TODO: Abort
 	return true;
 }
 
