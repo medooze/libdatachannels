@@ -140,7 +140,7 @@ public:
 	}
 
 private:
-	uint8_t* data = nullptr;
+	const uint8_t* data = nullptr;
 	size_t size = 0;
 	size_t pos = 0;
 };
