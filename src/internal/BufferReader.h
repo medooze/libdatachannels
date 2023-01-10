@@ -12,6 +12,7 @@
 class BufferReader
 {
 public:
+	BufferReader() = default;
 	BufferReader(const Buffer& buffer)  :
 		data(buffer.GetData()),
 		size(buffer.GetSize())
@@ -139,9 +140,9 @@ public:
 	}
 
 private:
-	uint8_t* data;
-	size_t size;
-	size_t pos;
+	uint8_t* data = nullptr;
+	size_t size = 0;
+	size_t pos = 0;
 };
 
 #endif
