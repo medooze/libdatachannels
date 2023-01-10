@@ -139,8 +139,8 @@ public:
 	}
 
 private:
-	const uint8_t* data;
-	const size_t size;
+	uint8_t* data;
+	size_t size;
 	size_t pos;
 };
 
