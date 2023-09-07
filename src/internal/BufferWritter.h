@@ -30,6 +30,10 @@ public:
 	inline size_t Set(const std::array<uint8_t,N>& array)	 { Set(pos,array);  return pos+=N;			}
 	inline size_t Set(const Buffer& buffer)			 { Set(pos,buffer); return pos+=buffer.GetSize();	}
 	inline size_t Set(const std::string& string)		 { Set(pos,string); return pos+=string.length();	}
+	template<std::size_t N>
+	inline size_t SetN(const std::array<uint8_t, N>& array, size_t num)	 { auto n = std::min(num, N); SetN(pos, array, n); return pos += n;		}
+	inline size_t SetN(const Buffer& buffer, size_t num)			 { auto n = std::min(num, buffer.GetSize()); SetN(pos, buffer, n); return pos += n;	}
+	inline size_t SetN(const std::string& string, size_t num)		 { auto n = std::min(num, string.length()); SetN(pos, string, n); return pos += n;	}
 	inline size_t Set1(uint8_t val)	  { Set1(pos,val); return pos+=1; }
 	inline size_t Set2(uint16_t val)  { Set2(pos,val); return pos+=2; }
 	inline size_t Set3(uint32_t val)  { Set3(pos,val); return pos+=3; }
@@ -53,6 +57,22 @@ public:
 	inline void Set(size_t i, const std::string& string)  
 	{
 		memcpy(data+i,string.data(),string.length());
+	}
+
+	template<std::size_t N>
+	inline void SetN(size_t i, const std::array<uint8_t, N>& array, size_t num)
+	{
+		memcpy(data + i, array.data(), num);
+	}
+
+	inline void SetN(size_t i, const Buffer& buffer, size_t num)
+	{
+		memcpy(data + i, buffer.GetData(), num);
+	}
+
+	inline void SetN(size_t i, const std::string& string, size_t num)
+	{
+		memcpy(data + i, string.data(), num);
 	}
 	
 	inline void Set1(size_t i, uint8_t val)
