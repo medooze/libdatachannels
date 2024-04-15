@@ -1,6 +1,7 @@
 // Unity jumbo build file
 #include "Datachannel.cpp"
 #include "Endpoint.cpp"
+#include "Sctp.cpp"
 #include "sctp/Association.cpp"
 #include "sctp/PacketHeader.cpp"
 #include "sctp/Stream.cpp"

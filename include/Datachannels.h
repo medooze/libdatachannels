@@ -61,16 +61,6 @@ enum Setup
 	Client,
 	Server
 };
-	
-class Transport
-{
-public:
-	virtual ~Transport() = default;
-	virtual size_t ReadPacket(uint8_t *data, uint32_t size) = 0;
-	virtual size_t WritePacket(uint8_t *data, uint32_t size) = 0; 
-	
-	virtual void OnPendingData(std::function<void(void)> callback) = 0;
-};
 
 class Endpoint
 {
@@ -83,12 +73,6 @@ public:
 	};
 	
 	using shared = std::shared_ptr<Endpoint>;
-public:
-	// Static methods
-	
-	// Create new datachannel endpoint
-	//	options.setup : Client/Server	
-	static Endpoint::shared Create(TimeService& timeService) ;
 	
 public:
 	virtual ~Endpoint() = default;
@@ -99,7 +83,26 @@ public:
 	// Getters
 	virtual uint16_t   GetLocalPort() const = 0;
 	virtual uint16_t   GetRemotePort() const = 0;
+};
+
+	
+class Transport
+{
+public:
+	virtual ~Transport() = default;
+	virtual size_t ReadPacket(uint8_t *data, uint32_t size) = 0;
+	virtual size_t WritePacket(uint8_t *data, uint32_t size) = 0; 
+	
+	virtual void OnPendingData(std::function<void(void)> callback) = 0;
+};
+
+class Sctp
+{
+public:
+	using shared = std::shared_ptr<Sctp>;
+	
 	virtual Transport& GetTransport() = 0;
+	virtual bool Close() = 0;
 };
 
 }; //namespace

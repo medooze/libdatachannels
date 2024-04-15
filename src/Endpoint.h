@@ -21,7 +21,6 @@ public:
 	// Getters
 	virtual uint16_t GetLocalPort() const override;
 	virtual uint16_t GetRemotePort() const override;
-	virtual datachannels::Transport& GetTransport() override;
 private:
 	sctp::Association association;
 };

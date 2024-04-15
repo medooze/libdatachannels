@@ -3,14 +3,6 @@
 
 namespace datachannels
 {
-	
-Endpoint::shared Endpoint::Create(TimeService& timeService) 
-{
-	//Create endpoint
-	auto endpoint = std::make_shared<datachannels::impl::Endpoint>(timeService);
-	//Cast and return
-	return std::static_pointer_cast<Endpoint>(endpoint);
-}
 
 namespace impl
 {
@@ -62,11 +54,6 @@ uint16_t Endpoint::GetLocalPort() const
 uint16_t Endpoint::GetRemotePort() const
 {
 	return association.GetRemotePort();
-}
-
-datachannels::Transport& Endpoint::GetTransport()
-{
-	return association;
 }
 	
 }; // namespace impl
