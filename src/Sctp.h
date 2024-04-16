@@ -60,6 +60,8 @@ private:
 	
 	TimeService& timeService;
 	std::unordered_map<Ports, std::shared_ptr<Endpoint>, PortsHash, PortsComp> endpoints;
+	
+	std::function<void(void)> onPendingDataCallback;
 };
 
 }
