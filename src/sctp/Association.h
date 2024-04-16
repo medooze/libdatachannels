@@ -35,7 +35,7 @@ public:
 		ShutDownAckSent
 	};
 public:
-	Association(datachannels::TimeService& timeService);
+	Association(datachannels::TimeService& timeService, datachannels::OnDataPendingListener& listener);
 	virtual ~Association();
 	
 	bool Associate();
@@ -62,11 +62,6 @@ public:
 	inline size_t WritePacket(Buffer& buffer)
 	{
 		return WritePacket(buffer.GetData(),buffer.GetSize());
-	}
-	
-	virtual void OnPendingData(std::function<void(void)> callback) override
-	{
-		onPendingData = callback;
 	}
 	
 	static constexpr const size_t MaxInitRetransmits = 10;
@@ -103,9 +98,10 @@ private:
 	uint64_t lastReceivedTransmissionSequenceNumber = MaxTransmissionSequenceNumber;
 	
 	bool pendingData = false;
-	std::function<void(void)> onPendingData;
 	std::multiset<uint64_t> receivedTransmissionSequenceNumbers;
 	std::map<uint16_t,Stream::shared> streams;
+	
+	datachannels::OnDataPendingListener& listener;
 };
 
 }

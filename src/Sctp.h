@@ -37,12 +37,10 @@ public:
 		Client	
 	};
 	
-	Sctp(TimeService& timeService) : timeService(timeService) {};
+	Sctp(TimeService& timeService, datachannels::OnDataPendingListener& listener) : timeService(timeService), listener(listener) {};
 
 	size_t ReadPacket(uint8_t *data, uint32_t size) override;
 	size_t WritePacket(uint8_t *data, uint32_t size) override; 
-	
-	void OnPendingData(std::function<void(void)> callback) override;
 	
 	Transport& GetTransport() override
 	{
@@ -60,7 +58,7 @@ private:
 	TimeService& timeService;
 	std::unordered_map<Ports, std::shared_ptr<Endpoint>, PortsHash, PortsComp> endpoints;
 	
-	std::function<void(void)> onPendingDataCallback;
+	datachannels::OnDataPendingListener& listener;
 };
 
 }

@@ -11,7 +11,7 @@ namespace impl
 class Endpoint : public datachannels::Endpoint
 {
 public:
-	Endpoint(TimeService& timeService);
+	Endpoint(TimeService& timeService, datachannels::OnDataPendingListener& listener);
 	virtual ~Endpoint();
 	
 	virtual bool Init(const Options& options, bool associate)  override;

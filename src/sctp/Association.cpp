@@ -5,6 +5,7 @@
 #include <random>
 #include <crc32c/crc32c.h>
 #include <condition_variable>
+#include <iostream>
 
 namespace sctp
 {
@@ -14,8 +15,9 @@ std::random_device rd;
 std::mt19937 gen{rd()};
 std::uniform_int_distribution<unsigned long> dis{1, 4294967295};
 
-Association::Association(datachannels::TimeService& timeService) :
-	timeService(timeService)
+Association::Association(datachannels::TimeService& timeService, datachannels::OnDataPendingListener &listener) :
+	timeService(timeService),
+	listener(listener)
 {
 }
 
@@ -54,6 +56,8 @@ void Association::ResetTimers()
 void Association::SetState(State state)
 {
 	this->state = state;
+	
+	std::cout << "State: " << int(state) << "\n";
 }
 
 bool Association::Associate()
@@ -140,6 +144,8 @@ bool Association::Abort()
 
 size_t Association::WritePacket(uint8_t *data, uint32_t size)
 {
+	std::cout << "WritePacket " << size << "\n";
+	
 	//Create reader
 	BufferReader reader(data,size);
 	
@@ -202,6 +208,8 @@ size_t Association::WritePacket(uint8_t *data, uint32_t size)
 
 size_t Association::ReadPacket(uint8_t *data, uint32_t size)
 {
+	std::cout << "ReadPacket " << size << " pending " << pendingData << "\n";
+		
 	//Check there is pending data
 	if (!pendingData)
 		//Nothing to do
@@ -663,9 +671,8 @@ void Association::Enqueue(const Chunk::shared& chunk)
 	//Reset flag
 	pendingData = true;
 	//If it is first
-	if (!wasPending && onPendingData)
-		//Call callback
-		onPendingData();
+	if (!wasPending)
+		listener.OnDataPending();
 }
 
 }; //namespace sctp
