@@ -25,10 +25,10 @@ void Sctp::OnPendingData(std::function<void(void)> callback)
 bool Sctp::Close()
 {
 	std::for_each(endpoints.begin(), endpoints.end(), 
-                  [](auto& p) { 
-                      p.second->Close();
-                  }); 
-		  
+		[](auto& p) { 
+			p.second->Close();
+		});
+		
 	return true;
 }
 

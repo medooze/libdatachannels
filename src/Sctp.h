@@ -21,10 +21,10 @@ struct PortsComp
 
 struct PortsHash
 {
-    std::size_t operator()(const Ports& p) const
-    {
-        return (size_t(p.localPort) << 16) + p.remotePort;
-    }
+	std::size_t operator()(const Ports& p) const
+	{
+		return (size_t(p.localPort) << 16) + p.remotePort;
+	}
 };
 
 class Sctp : public datachannels::Sctp, public datachannels::Transport
@@ -36,7 +36,6 @@ public:
 		Sever,
 		Client	
 	};
-
 	
 	Sctp(TimeService& timeService) : timeService(timeService) {};
 
