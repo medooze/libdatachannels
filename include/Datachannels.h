@@ -61,6 +61,17 @@ public:
 	
 };
 
+	
+class Transport
+{
+public:
+	virtual ~Transport() = default;
+	virtual size_t ReadPacket(uint8_t *data, uint32_t size) = 0;
+	virtual size_t WritePacket(uint8_t *data, uint32_t size) = 0; 
+	
+	virtual void OnPendingData(std::function<void(void)> callback) = 0;
+};
+
 class Endpoint
 {
 public:
@@ -80,17 +91,7 @@ public:
 	// Getters
 	virtual uint16_t   GetLocalPort() const = 0;
 	virtual uint16_t   GetRemotePort() const = 0;
-};
-
-	
-class Transport
-{
-public:
-	virtual ~Transport() = default;
-	virtual size_t ReadPacket(uint8_t *data, uint32_t size) = 0;
-	virtual size_t WritePacket(uint8_t *data, uint32_t size) = 0; 
-	
-	virtual void OnPendingData(std::function<void(void)> callback) = 0;
+	virtual Transport& GetTransport() = 0;
 };
 
 class Sctp

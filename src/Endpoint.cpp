@@ -55,6 +55,11 @@ uint16_t Endpoint::GetRemotePort() const
 {
 	return association.GetRemotePort();
 }
+
+datachannels::Transport& Endpoint::GetTransport()
+{
+	return association;
+}
 	
 }; // namespace impl
 }; // namespace datachannel

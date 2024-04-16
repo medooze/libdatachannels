@@ -54,8 +54,6 @@ public:
 	
 	std::shared_ptr<Endpoint> AddEndpoint(const Endpoint::Options& options);
 	
-	// @todo std::shared_ptr<Endpoint> CreateEndpoint();
-	
 private:
 
 	Mode mode = Mode::Sever;
