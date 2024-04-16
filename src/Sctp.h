@@ -11,14 +11,11 @@ namespace datachannels
 namespace impl
 {
 
-struct Ports
+struct PortsComp
 {
-	uint16_t localPort = 0;
-	uint16_t remotePort = 0;
-	
-	bool operator==(const Ports& other) const
+	bool operator()(const Ports& lhs, const Ports& rhs) const
 	{
-		return localPort == other.localPort && remotePort == other.remotePort;
+		return lhs.localPort == rhs.localPort && lhs.remotePort == rhs.remotePort;
 	}
 };
 
@@ -30,11 +27,16 @@ struct PortsHash
     }
 };
 
-
-
 class Sctp : public datachannels::Sctp, public datachannels::Transport
 {
 public:
+	
+	enum class Mode
+	{
+		Sever,
+		Client	
+	};
+
 	
 	Sctp(TimeService& timeService) : timeService(timeService) {};
 
@@ -50,21 +52,16 @@ public:
 	
 	bool Close() override;
 	
-	std::shared_ptr<Endpoint> AddEndpoint(const Endpoint::Options& options)
-	{
-		auto endpoint = std::make_shared<Endpoint>(timeService);
-		endpoint->Init(options);
-		
-		Ports ports {options.localPort, options.remotePort};
-		endpoints[ports] = endpoint;
-		
-		return endpoint;
-	}
+	std::shared_ptr<Endpoint> AddEndpoint(const Endpoint::Options& options);
+	
+	// @todo std::shared_ptr<Endpoint> CreateEndpoint();
 	
 private:
 
+	Mode mode = Mode::Sever;
+	
 	TimeService& timeService;
-	std::unordered_map<Ports, std::shared_ptr<Endpoint>, PortsHash> endpoints;
+	std::unordered_map<Ports, std::shared_ptr<Endpoint>, PortsHash, PortsComp> endpoints;
 };
 
 }

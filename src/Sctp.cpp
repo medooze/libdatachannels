@@ -23,4 +23,14 @@ bool Sctp::Close()
 	return true;
 }
 
+std::shared_ptr<Endpoint> Sctp::AddEndpoint(const Endpoint::Options& options)
+{
+	auto endpoint = std::make_shared<Endpoint>(timeService);
+	endpoint->Init(options, mode == Mode::Client);
+	
+	endpoints[options.ports] = endpoint;
+	
+	return endpoint;
+}
+
 }

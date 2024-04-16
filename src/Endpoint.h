@@ -14,7 +14,7 @@ public:
 	Endpoint(TimeService& timeService);
 	virtual ~Endpoint();
 	
-	virtual bool Init(const Options& options)  override;
+	virtual bool Init(const Options& options, bool associate)  override;
 	virtual Datachannel::shared CreateDatachannel(const Datachannel::Options& options)  override;
 	virtual bool Close()  override;
 	

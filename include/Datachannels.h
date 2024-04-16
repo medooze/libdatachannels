@@ -30,6 +30,11 @@ public:
 	virtual Timer::shared CreateTimer(const std::chrono::milliseconds& ms, const std::chrono::milliseconds& repeat, std::function<void(std::chrono::milliseconds)> timeout) = 0;
 };
 
+struct Ports
+{
+	uint16_t localPort = 5000;
+	uint16_t remotePort = 5000;
+};
 
 class Datachannel
 {
@@ -56,27 +61,19 @@ public:
 	
 };
 
-enum Setup
-{
-	Client,
-	Server
-};
-
 class Endpoint
 {
 public:
 	struct Options
 	{
-		uint16_t localPort	= 5000;
-		uint16_t remotePort	= 5000;
-		Setup setup		= Server;
+		Ports ports;
 	};
 	
 	using shared = std::shared_ptr<Endpoint>;
 	
 public:
 	virtual ~Endpoint() = default;
-	virtual bool Init(const Options& options) = 0;
+	virtual bool Init(const Options& options, bool associate) = 0;
 	virtual Datachannel::shared CreateDatachannel(const Datachannel::Options& options)  = 0;
 	virtual bool Close()  = 0;
 	
@@ -100,6 +97,12 @@ class Sctp
 {
 public:
 	using shared = std::shared_ptr<Sctp>;
+	
+	enum class Mode
+	{
+		Client,
+		Server
+	};
 	
 	virtual Transport& GetTransport() = 0;
 	virtual bool Close() = 0;

@@ -19,14 +19,14 @@ Endpoint::~Endpoint()
 	association.Abort();
 }
 
-bool Endpoint::Init(const Options& options)
+bool Endpoint::Init(const Options& options, bool associate)
 {
 	//Set ports on sctp
-	association.SetLocalPort(options.localPort);
-	association.SetRemotePort(options.remotePort);
+	association.SetLocalPort(options.ports.localPort);
+	association.SetRemotePort(options.ports.remotePort);
 	
 	//If we are clients
-	if (options.setup==Setup::Client)
+	if (associate)
 		//Start association
 		return association.Associate();
 	
