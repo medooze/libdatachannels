@@ -6,6 +6,37 @@
 #include <string>
 #include <functional>
 
+#ifdef ENABLE_DATACHANNEL_LOGGING
+extern int Debug(const char *msg, ...);
+extern int Log(const char *msg, ...);
+extern int Warning(const char *msg, ...);
+extern int Error(const char *msg, ...);
+#endif
+
+inline void DEBUG(...) {
+	#ifdef ENABLE_DATACHANNEL_LOGGING
+		(void)Debug(__VA_ARGS__);
+	#endif
+}
+
+inline void Log(...) {
+	#ifdef ENABLE_DATACHANNEL_LOGGING
+		(void)Log(__VA_ARGS__);
+	#endif
+}
+
+inline void Warning(...) {
+	#ifdef ENABLE_DATACHANNEL_LOGGING
+		(void)Warning(__VA_ARGS__);
+	#endif
+}
+
+inline void Error(...) {
+	#ifdef ENABLE_DATACHANNEL_LOGGING
+		(void)Error(__VA_ARGS__);
+	#endif
+}
+
 namespace datachannels
 {
 
