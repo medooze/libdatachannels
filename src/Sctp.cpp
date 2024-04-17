@@ -1,20 +1,48 @@
 #include "Sctp.h"
 
+using namespace datachannels;
+
 namespace datachannels::impl
 {
 	
+Sctp::Sctp(TimeService& timeService, datachannels::OnDataPendingListener& listener) : 
+	timeService(timeService), listener(listener) 
+{
+};
+	
 size_t Sctp::ReadPacket(uint8_t *data, uint32_t size)
 {
-	if (endpoints.empty()) return 0;
+	// @todo Priority chunks are put first. Now it always read the front endpoint
+	//       first
+	for (auto &endpoint : endpoints)
+	{
+		auto sz = endpoint.second->GetTransport().ReadPacket(data, size);
+		if (sz > 0) return sz;
+	}
 	
-	return endpoints.begin()->second->GetTransport().ReadPacket(data, size);
+	return 0;
 }
 
 size_t Sctp::WritePacket(uint8_t *data, uint32_t size)
 {
-	if (endpoints.empty()) return 0;
+	BufferReader reader(data, size);
 	
-	return endpoints.begin()->second->GetTransport().WritePacket(data, size);
+	auto header = sctp::PacketHeader::Parse(reader);
+	if (!header) return 0;
+	
+	Ports ports {header->sourcePortNumber, header->destinationPortNumber};
+	
+	Endpoint::shared endpoint;
+	if (endpoints.find(ports) != endpoints.end())
+	{
+		endpoint = endpoints.at(ports);
+	}
+	else
+	{
+		endpoint = AddEndpoint({ports});
+	}
+	
+	return endpoint->GetTransport().WritePacket(data, size);
 } 
 
 

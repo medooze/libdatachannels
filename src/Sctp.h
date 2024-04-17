@@ -37,21 +37,12 @@ public:
 		Client
 	};
 	
-	Sctp(TimeService& timeService, datachannels::OnDataPendingListener& listener) : 
-		timeService(timeService), listener(listener) 
-	{
-		// For testing
-		AddEndpoint({});
-	};
+	Sctp(TimeService& timeService, datachannels::OnDataPendingListener& listener);
 
 	size_t ReadPacket(uint8_t *data, uint32_t size) override;
 	size_t WritePacket(uint8_t *data, uint32_t size) override; 
 	
-	Transport& GetTransport() override
-	{
-		return *this;
-	}
-	
+	inline Transport& GetTransport() override	{ return *this; }
 	bool Close() override;
 	
 	std::shared_ptr<Endpoint> AddEndpoint(const Endpoint::Options& options);
