@@ -27,10 +27,12 @@ size_t Sctp::WritePacket(uint8_t *data, uint32_t size)
 {
 	BufferReader reader(data, size);
 	
-	auto header = sctp::PacketHeader::Parse(reader);
-	if (!header) return 0;
+	if (size < 4) return 0;
 	
-	Ports ports {header->sourcePortNumber, header->destinationPortNumber};
+	uint16_t sourcePortNumber	= reader.Get2();
+	uint16_t destinationPortNumber	= reader.Get2();
+	
+	Ports ports { sourcePortNumber, destinationPortNumber };
 	
 	Endpoint::shared endpoint;
 	if (endpoints.find(ports) != endpoints.end())

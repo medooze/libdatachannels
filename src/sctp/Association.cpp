@@ -278,6 +278,8 @@ size_t Association::ReadPacket(uint8_t *data, uint32_t size)
 
 void Association::Process(const Chunk::shared& chunk)
 {
+	Debug("Current State: %d, Chunk type: %d\n", int(state), int(chunk->type));
+	
 	//Depending onthe state
 	switch (state)
 	{
