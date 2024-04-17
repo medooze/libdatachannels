@@ -12,10 +12,10 @@ extern int Log(const char *msg, ...);
 extern int Warning(const char *msg, ...);
 extern int Error(const char *msg, ...);
 #else
-extern int Debug(const char *msg, ...) {};
-extern int Log(const char *msg, ...) {};
-extern int Warning(const char *msg, ...) {};
-extern int Error(const char *msg, ...) {};
+inline int Debug(const char *msg, ...) {};
+inline int Log(const char *msg, ...) {};
+inline int Warning(const char *msg, ...) {};
+inline int Error(const char *msg, ...) {};
 #endif
 
 
