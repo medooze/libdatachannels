@@ -5,7 +5,6 @@
 #include <random>
 #include <crc32c/crc32c.h>
 #include <condition_variable>
-#include <iostream>
 
 namespace sctp
 {
@@ -57,7 +56,7 @@ void Association::SetState(State state)
 {
 	this->state = state;
 	
-	std::cout << "State: " << int(state) << "\n";
+	Debug("Association %p State: %d\n", this, int(state));
 }
 
 bool Association::Associate()
@@ -144,8 +143,6 @@ bool Association::Abort()
 
 size_t Association::WritePacket(uint8_t *data, uint32_t size)
 {
-	std::cout << "WritePacket " << size << "\n";
-	
 	//Create reader
 	BufferReader reader(data,size);
 	
@@ -208,8 +205,6 @@ size_t Association::WritePacket(uint8_t *data, uint32_t size)
 
 size_t Association::ReadPacket(uint8_t *data, uint32_t size)
 {
-	std::cout << "ReadPacket " << size << " pending " << pendingData << "\n";
-		
 	//Check there is pending data
 	if (!pendingData)
 		//Nothing to do
