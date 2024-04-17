@@ -34,10 +34,15 @@ public:
 	enum class Mode
 	{
 		Sever,
-		Client	
+		Client
 	};
 	
-	Sctp(TimeService& timeService, datachannels::OnDataPendingListener& listener) : timeService(timeService), listener(listener) {};
+	Sctp(TimeService& timeService, datachannels::OnDataPendingListener& listener) : 
+		timeService(timeService), listener(listener) 
+	{
+		// For testing
+		AddEndpoint({});
+	};
 
 	size_t ReadPacket(uint8_t *data, uint32_t size) override;
 	size_t WritePacket(uint8_t *data, uint32_t size) override; 

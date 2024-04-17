@@ -17,10 +17,6 @@ size_t Sctp::WritePacket(uint8_t *data, uint32_t size)
 	return endpoints.begin()->second->GetTransport().WritePacket(data, size);
 } 
 
-void Sctp::OnPendingData(std::function<void(void)> callback)
-{
-	onPendingDataCallback = callback;
-}
 
 bool Sctp::Close()
 {
@@ -34,9 +30,8 @@ bool Sctp::Close()
 
 std::shared_ptr<Endpoint> Sctp::AddEndpoint(const Endpoint::Options& options)
 {
-	auto endpoint = std::make_shared<Endpoint>(timeService);
+	auto endpoint = std::make_shared<Endpoint>(timeService, listener);
 	endpoint->Init(options, mode == Mode::Client);
-	endpoint->GetTransport().OnPendingData(onPendingDataCallback);
 	
 	endpoints[options.ports] = endpoint;
 	
