@@ -40,6 +40,7 @@ public:
 	bool HasPendingData() const		{ return pendingData;	}
 	
 	void SetLocalVerificationTag(uint32_t tag) { localVerificationTag = tag; }
+	void SetRemoteVerificationTag(uint32_t tag) { remoteVerificationTag = tag; }
 	  
 	virtual size_t ReadPacket(uint8_t *data, uint32_t size) override;
 	virtual size_t WritePacket(uint8_t *data, uint32_t size) override;

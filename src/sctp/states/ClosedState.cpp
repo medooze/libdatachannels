@@ -42,6 +42,8 @@ fsm::Maybe<fsm::TransitionTo<EstablishedState>> ClosedState::handle(const ChunkE
 		//	Verification Tag (Tag_Z) in the Initiate Tag field.
 		//
 		
+		association.SetRemoteVerificationTag(init->initiateTag);
+		
 		//Create new verification tag
 		auto localVerificationTag = dis(gen);
 		
