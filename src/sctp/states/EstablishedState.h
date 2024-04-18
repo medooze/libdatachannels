@@ -15,15 +15,14 @@ class EstablishedState : public fsm::ByDefault<fsm::Nothing>
 {
 public:
 	using ByDefault::handle;
-
 	using TransmissionSequenceNumberWrapper = SequenceNumberWrapper<uint32_t>;
+	
 	static constexpr uint64_t MaxTransmissionSequenceNumber = TransmissionSequenceNumberWrapper::MaxSequenceNumber;
 	static constexpr std::chrono::milliseconds SackTimeout = 100ms;
 
 	EstablishedState(Association& association);
 	
-	template <typename Event>
-	void onEnter(const Event& event);
+	template <typename Event> void onEnter(const Event& event);
 	
 	fsm::Nothing handle(const ChunkEvent& event);
 	fsm::Nothing handle(const ProcessedEvent& event);

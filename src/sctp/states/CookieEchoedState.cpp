@@ -4,8 +4,8 @@
 
 using namespace sctp;
 
-
-void CookieEchoedState::onEnter(const ChunkEvent& event, CookieEchoChunk::shared chunk)
+template<typename Event>
+void CookieEchoedState::onEnter(const Event& event, CookieEchoChunk::shared chunk)
 {
 	echoChunk = chunk;
 	
@@ -18,7 +18,8 @@ void CookieEchoedState::onEnter(const ChunkEvent& event, CookieEchoChunk::shared
 	});
 }
 
-void CookieEchoedState::onLeave(const ChunkEvent& event)
+template<typename Event>
+void CookieEchoedState::onLeave(const Event& event)
 {
 	// Stop timer
 	timer->Cancel();

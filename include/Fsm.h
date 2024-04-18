@@ -92,34 +92,18 @@ private:
 	}
 };
 
+// ----------------------------------------------------------------------------
+// Authored by Harry.Zhang@dolby.com
 template <typename TargetState, typename T>
-class ParameterizedTransitionTo
+class ParameterizedTransitionTo : public TransitionTo<TargetState>
 {
 public:
-	template <typename Machine, typename State, typename Event>
-	void execute(Machine& machine, State& prevState, const Event& event)
+	ParameterizedTransitionTo(T&& param) : param(std::forward<T>(param))
 	{
-		leave(prevState, event);
-		TargetState& newState = machine.template transitionTo<TargetState>();
-		enter(newState, event);
 	}
 	
-	T param;
-
 private:
-	void leave(...)
-	{
-	}
-
-	template <typename State, typename Event>
-	auto leave(State& state, const Event& event) -> decltype(state.onLeave(event))
-	{
-		return state.onLeave(event);
-	}
-
-	void enter(...)
-	{
-	}
+	T param;
 
 	template <typename State, typename Event>
 	auto enter(State& state, const Event& event) -> decltype(state.onEnter(event, param))
@@ -127,6 +111,7 @@ private:
 		return state.onEnter(event, param);
 	}
 };
+// ----------------------------------------------------------------------------
 
 template <typename... Actions>
 class OneOf

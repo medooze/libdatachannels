@@ -27,8 +27,8 @@ public:
 	
 	CookieEchoedState(Association& association) : association(association) {};
 	
-	void onEnter(const ChunkEvent& event, CookieEchoChunk::shared chunk);
-	void onLeave(const ChunkEvent& event);
+	template<typename Event> void onEnter(const Event& event, CookieEchoChunk::shared chunk);
+	template<typename Event> void onLeave(const Event& event);
 	
 	fsm::Maybe<fsm::TransitionTo<EstablishedState>> handle(const ChunkEvent& event);
 	fsm::Maybe<fsm::TransitionTo<ClosedState>> handle(const TimeoutEvent& event);
