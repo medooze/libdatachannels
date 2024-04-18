@@ -23,5 +23,8 @@
 #include "sctp/chunks/ForwardCumulativeTSNChunk.cpp"
 #include "sctp/chunks/UnknownChunk.cpp"
 #include "sctp/chunks/PaddingChunk.cpp"
-
+#include "sctp/states/ClosedState.cpp"
+#include "sctp/states/CookieWaitState.cpp"
+#include "sctp/states/CookieEchoedState.cpp"
+#include "sctp/states/EstablishedState.cpp"
 

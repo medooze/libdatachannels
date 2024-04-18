@@ -10,30 +10,21 @@
 #include "sctp/Stream.h"
 #include "BufferWritter.h"
 #include "BufferReader.h"
+#include "states/ClosedState.h"
+#include "states/CookieWaitState.h"
+#include "states/CookieEchoedState.h"
+#include "states/EstablishedState.h"
 
 using namespace std::chrono_literals;
 
 namespace sctp
 {
-	
+
+using AssociationFsm = fsm::StateMachine<ClosedState, CookieWaitState, CookieEchoedState, EstablishedState>;
+
 class Association : public datachannels::Transport
 {
-private:
-	using TransmissionSequenceNumberWrapper = SequenceNumberWrapper<uint32_t>;
-	static constexpr const uint64_t MaxTransmissionSequenceNumber = TransmissionSequenceNumberWrapper::MaxSequenceNumber;
-public:
-	enum State
-	{
-		Closed,
-		CookieWait,
-		CookieEchoed,
-		Established,
-		ShutdownPending,
-		ShutDownSent,
-		ShutDownReceived,
-		ShutDown,
-		ShutDownAckSent
-	};
+
 public:
 	Association(datachannels::TimeService& timeService, datachannels::OnDataPendingListener& listener);
 	virtual ~Association();
@@ -46,9 +37,9 @@ public:
 	void SetRemotePort(uint16_t port) 	{ remotePort = port;	}
 	uint16_t GetLocalPort() const 		{ return localPort;	}
 	uint16_t GetRemotePort() const		{ return remotePort;	}
-	State GetState() const			{ return state;		}
 	bool HasPendingData() const		{ return pendingData;	}
 	
+	void SetLocalVerificationTag(uint32_t tag) { localVerificationTag = tag; }
 	  
 	virtual size_t ReadPacket(uint8_t *data, uint32_t size) override;
 	virtual size_t WritePacket(uint8_t *data, uint32_t size) override;
@@ -64,17 +55,26 @@ public:
 		return WritePacket(buffer.GetData(),buffer.GetSize());
 	}
 	
-	static constexpr const size_t MaxInitRetransmits = 10;
-	static constexpr const std::chrono::milliseconds InitRetransmitTimeout	= 100ms;
-	static constexpr const std::chrono::milliseconds SackTimeout		= 100ms;
-private:
-	void Process(const Chunk::shared& chunk);
-	void SetState(State state);
 	void Enqueue(const Chunk::shared& chunk);
-	void Acknowledge();
-	void ResetTimers();
+	
+	template <typename Event>
+	void HandleEvent(const Event& event)
+	{
+		fsm.handle(event);
+	}
+	
+	inline uint32_t GetLocalAdvertisedReceiverWindowCredit() const
+	{
+		return localAdvertisedReceiverWindowCredit;
+	}
+	
+	inline datachannels::TimeService& GetTimeService()
+	{
+		return timeService;
+	}
+	
 private:
-	State state = State::Closed;
+
 	std::list<Chunk::shared> queue;
 	datachannels::TimeService& timeService;
 	
@@ -84,24 +84,19 @@ private:
 	uint32_t remoteAdvertisedReceiverWindowCredit = 0;
 	uint32_t localVerificationTag = 0;
 	uint32_t remoteVerificationTag = 0;
-	uint32_t initRetransmissions = 0;
-	
-	bool pendingAcknowledge = false;
-	std::chrono::milliseconds pendingAcknowledgeTimeout = 0ms;
-	
-	datachannels::Timer::shared initTimer;
-	datachannels::Timer::shared cookieEchoTimer;
-	datachannels::Timer::shared sackTimer;
-	
-	size_t numberOfPacketsWithoutAcknowledge = 0;
-	TransmissionSequenceNumberWrapper receivedTransmissionSequenceNumberWrapper;
-	uint64_t lastReceivedTransmissionSequenceNumber = MaxTransmissionSequenceNumber;
 	
 	bool pendingData = false;
-	std::multiset<uint64_t> receivedTransmissionSequenceNumbers;
+
 	std::map<uint16_t,Stream::shared> streams;
 	
 	datachannels::OnDataPendingListener& listener;
+	
+	ClosedState closedState;
+	CookieWaitState cookieWaitState;
+	CookieEchoedState cookieEchoedState;
+	EstablishedState establishedState;
+	
+	AssociationFsm fsm;
 };
 
 }
