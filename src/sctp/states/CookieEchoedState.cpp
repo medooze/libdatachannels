@@ -7,6 +7,8 @@ using namespace sctp;
 template<typename Event>
 void CookieEchoedState::onEnter(const Event& event, CookieEchoChunk::shared chunk)
 {
+	Debug("Enter cookie echoed state\n");
+	
 	echoChunk = chunk;
 	
 	//Reset  retransmissions
@@ -21,6 +23,8 @@ void CookieEchoedState::onEnter(const Event& event, CookieEchoChunk::shared chun
 template<typename Event>
 void CookieEchoedState::onLeave(const Event& event)
 {
+	Debug("Leave cookie echoed state\n");
+	
 	// Stop timer
 	timer->Cancel();
 	timer.reset();

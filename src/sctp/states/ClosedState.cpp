@@ -21,8 +21,14 @@ ClosedState::ClosedState(Association& association) :
 template<typename Event>
 void ClosedState::onEnter(const Event& event)
 {
-	Log("Enter closed state\n");
+	Debug("Enter closed state\n");
 	association.SetLocalVerificationTag(0);
+}
+
+template<typename Event>
+void ClosedState::onLeave(const Event& event)
+{
+	Debug("Leave closed state\n");
 }
 
 fsm::Maybe<fsm::TransitionTo<EstablishedState>> ClosedState::handle(const ChunkEvent& event)

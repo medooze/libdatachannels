@@ -17,7 +17,20 @@ EstablishedState::EstablishedState(Association& association) :
 template <typename Event>
 void EstablishedState::onEnter(const Event& event)
 {
-	Log("Enter established state\n");
+	Debug("Enter established state\n");
+}
+
+template <typename Event>
+void EstablishedState::onLeave(const Event& event)
+{
+	Debug("Leave established state\n");
+	
+	// Stop timer
+	if (sackTimer)
+	{
+		sackTimer->Cancel();
+		sackTimer.reset();
+	}
 }
 
 fsm::Nothing EstablishedState::handle(const ChunkEvent& event)

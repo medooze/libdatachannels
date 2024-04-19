@@ -21,6 +21,7 @@ public:
 	ClosedState(Association& association);
 	
 	template<typename Event> void onEnter(const Event& event);
+	template<typename Event> void onLeave(const Event& event);
 	
 	fsm::Maybe<fsm::TransitionTo<EstablishedState>> handle(const ChunkEvent& event);
 	fsm::Maybe<fsm::ParameterizedTransitionTo<CookieWaitState, InitiationChunk::shared>> handle(const AssociateEvent& event);

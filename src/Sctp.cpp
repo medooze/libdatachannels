@@ -58,12 +58,18 @@ bool Sctp::Close()
 	return true;
 }
 
-std::shared_ptr<Endpoint> Sctp::AddEndpoint(const Endpoint::Options& options)
+std::shared_ptr<Endpoint> Sctp::AddEndpoint(const Endpoint::Options& options, bool associate)
 {
-	auto endpoint = std::make_shared<Endpoint>(timeService, listener);
-	endpoint->Init(options, mode == Mode::Client);
+	// @todo Check whether the ports exists already
 	
+	auto endpoint = std::make_shared<Endpoint>(timeService, listener);
 	endpoints[options.ports] = endpoint;
+	
+	if (!endpoint->Init(options, associate))
+	{
+		endpoints.erase(options.ports);
+		return nullptr;
+	}
 	
 	return endpoint;
 }

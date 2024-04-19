@@ -45,7 +45,7 @@ public:
 	inline Transport& GetTransport() override	{ return *this; }
 	bool Close() override;
 	
-	std::shared_ptr<Endpoint> AddEndpoint(const Endpoint::Options& options);
+	std::shared_ptr<Endpoint> AddEndpoint(const Endpoint::Options& options, bool associate = false);
 	
 private:
 

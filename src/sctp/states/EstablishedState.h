@@ -23,6 +23,7 @@ public:
 	EstablishedState(Association& association);
 	
 	template <typename Event> void onEnter(const Event& event);
+	template <typename Event> void onLeave(const Event& event);
 	
 	fsm::Nothing handle(const ChunkEvent& event);
 	fsm::Nothing handle(const ProcessedEvent& event);

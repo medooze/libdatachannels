@@ -7,6 +7,8 @@ using namespace sctp;
 template<typename Event>
 void CookieWaitState::onEnter(const Event& event, InitiationChunk::shared chunk)
 {
+	Debug("Enter cookie wait state\n");
+	
 	initChunk = chunk;
 	
 	//Reset init retransmissions
@@ -21,6 +23,8 @@ void CookieWaitState::onEnter(const Event& event, InitiationChunk::shared chunk)
 template<typename Event>
 void CookieWaitState::onLeave(const Event& event)
 {
+	Debug("Leave cookie wait state\n");
+	
 	// Stop timer
 	timer->Cancel();
 	timer.reset();
@@ -31,6 +35,9 @@ fsm::Maybe<fsm::ParameterizedTransitionTo<CookieEchoedState, CookieEchoChunk::sh
 	auto chunk = event.chunk;
 	if (chunk->type == Chunk::Type::INIT_ACK)
 	{
+		// Cancel timer
+		timer->Cancel();
+		
 		//Get chunk of correct type
 		auto initAck = std::static_pointer_cast<InitiationAcknowledgementChunk>(chunk);
 		
