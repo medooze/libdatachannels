@@ -65,13 +65,22 @@ size_t Association::WritePacket(uint8_t *data, uint32_t size)
 
 	//Ensure it was correctly parsed
 	if (!header)
+	{
 		//Error
+		Debug("-Association::WritePacket() | header parse failed.");
 		return false;
+	}
 
 	//Check correct local and remote port
 	if (header->sourcePortNumber!=remotePort || header->destinationPortNumber!=localPort || header->verificationTag!=localVerificationTag)
+	{
 		//Error
+		Debug("-Association::WritePacket() | unexpected header. expected: [%d,%d,%x] received: [%d,%d,%x]\n", 
+			remotePort, localPort, localVerificationTag,
+			header->sourcePortNumber, header->destinationPortNumber, header->verificationTag);
+			
 		return false;
+	}
 	
 	//Read chunks
 	while (reader.GetLeft()>4)
