@@ -47,6 +47,8 @@ Chunk::shared Chunk::Parse(BufferReader& reader)
 			return ReConfigChunk::Parse(reader);
 		case Type::FORWARD_CUMULATIVE_TSN:
 			return ForwardCumulativeTSNChunk::Parse(reader);
+		case Type::PAD:
+			break;
 	}
 	
 	return UnknownChunk::Parse(reader);

@@ -30,7 +30,7 @@ public:
 	template<typename Event> void onEnter(const Event& event, CookieEchoChunk::shared chunk);
 	template<typename Event> void onLeave(const Event& event);
 	
-	fsm::Maybe<fsm::TransitionTo<EstablishedState>> handle(const ChunkEvent& event);
+	fsm::Maybe<fsm::ParameterizedTransitionTo<EstablishedState, std::pair<uint32_t, uint32_t>>> handle(const ChunkEvent& event);
 	fsm::Maybe<fsm::TransitionTo<ClosedState>> handle(const TimeoutEvent& event);
 	
 private:

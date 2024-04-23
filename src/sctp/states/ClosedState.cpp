@@ -31,13 +31,14 @@ void ClosedState::onLeave(const Event& event)
 	Debug("Leave closed state\n");
 }
 
-fsm::Maybe<fsm::TransitionTo<EstablishedState>> ClosedState::handle(const ChunkEvent& event)
+fsm::Maybe<fsm::ParameterizedTransitionTo<EstablishedState, std::pair<uint32_t, uint32_t>>> ClosedState::handle(const ChunkEvent& event)
 {
 	auto chunk = event.chunk;
 	if (chunk->type == Chunk::Type::INIT)
 	{
 		//Get chunk of correct type
 		auto init = std::static_pointer_cast<InitiationChunk>(chunk);
+		initialTsn = init->initialTransmissionSequenceNumber;
 		
 		//rfc4960#page-55
 		//	"Z" shall respond immediately with an INIT ACK chunk.  The
@@ -108,7 +109,7 @@ fsm::Maybe<fsm::TransitionTo<EstablishedState>> ClosedState::handle(const ChunkE
 		///Enquee
 		association.Enqueue(std::static_pointer_cast<Chunk>(cookieAck));
 		
-		return fsm::TransitionTo<EstablishedState>{};
+		return fsm::ParameterizedTransitionTo<EstablishedState, std::pair<uint32_t, uint32_t>>{{initialTsn, 0}};
 	}
 	
 	return fsm::Nothing{};

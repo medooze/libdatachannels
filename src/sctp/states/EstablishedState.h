@@ -5,6 +5,7 @@
 #include "Fsm.h"
 #include "sctp/Chunk.h"
 #include "sctp/SequenceNumberWrapper.h"
+#include "sctp/DataReceiver.h"
 
 namespace sctp
 {
@@ -22,7 +23,7 @@ public:
 
 	EstablishedState(Association& association);
 	
-	template <typename Event> void onEnter(const Event& event);
+	template <typename Event> void onEnter(const Event& event, const std::pair<uint32_t, uint32_t>& parameters);
 	template <typename Event> void onLeave(const Event& event);
 	
 	fsm::Nothing handle(const ChunkEvent& event);
@@ -33,10 +34,7 @@ private:
 	
 	Association& association;
 	
-	TransmissionSequenceNumberWrapper receivedTransmissionSequenceNumberWrapper;
-	uint64_t lastReceivedTransmissionSequenceNumber = MaxTransmissionSequenceNumber;
-	
-	std::multiset<uint64_t> receivedTransmissionSequenceNumbers;
+	std::shared_ptr<DataReceiver> dataReceiver;
 
 	bool pendingAcknowledge = false;
 	std::chrono::milliseconds pendingAcknowledgeTimeout = 0ms;

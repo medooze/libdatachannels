@@ -30,7 +30,7 @@ void CookieEchoedState::onLeave(const Event& event)
 	timer.reset();
 }
 
-fsm::Maybe<fsm::TransitionTo<EstablishedState>> CookieEchoedState::handle(const ChunkEvent& event)
+fsm::Maybe<fsm::ParameterizedTransitionTo<EstablishedState, std::pair<uint32_t, uint32_t>>> CookieEchoedState::handle(const ChunkEvent& event)
 {
 	auto chunk = event.chunk;
 	if (chunk->type == Chunk::Type::COOKIE_ACK)
@@ -38,9 +38,10 @@ fsm::Maybe<fsm::TransitionTo<EstablishedState>> CookieEchoedState::handle(const 
 		// Stop timer
 		timer->Cancel();
 		
-		return fsm::TransitionTo<EstablishedState>{};
+		// @todo Proper initial tsn
+		return fsm::ParameterizedTransitionTo<EstablishedState, std::pair<uint32_t, uint32_t>>{{0, 0}};
 	}
-			
+
 	return fsm::Nothing{};
 }
 
