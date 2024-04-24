@@ -6,6 +6,7 @@
 #include "sctp/Chunk.h"
 #include "sctp/SequenceNumberWrapper.h"
 #include "sctp/DataReceiver.h"
+#include "sctp/DataSender.h"
 
 namespace sctp
 {
@@ -35,6 +36,7 @@ private:
 	Association& association;
 	
 	std::shared_ptr<DataReceiver> dataReceiver;
+	std::shared_ptr<DataSender> dataSender;
 
 	bool pendingAcknowledge = false;
 	std::chrono::milliseconds pendingAcknowledgeTimeout = 0ms;

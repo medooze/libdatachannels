@@ -19,7 +19,8 @@ void EstablishedState::onEnter(const Event& event, const std::pair<uint32_t, uin
 {
 	Debug("Enter established state\n");
 	
-	dataReceiver = std::make_shared<DataReceiver>(parameters.first);
+	dataReceiver = std::make_shared<DataReceiver>(parameters.first, association);
+	dataSender = std::make_shared<DataSender>(association.GetTimeService(), parameters.second, association);
 }
 
 template <typename Event>
@@ -73,7 +74,7 @@ fsm::Nothing EstablishedState::handle(const ChunkEvent& event)
 	}
 	else if(chunk->type == Chunk::Type::SACK)
 	{
-		
+		dataSender->handleSackChunk(std::static_pointer_cast<SelectiveAcknowledgementChunk>(chunk));
 	}
 	
 	return fsm::Nothing{};

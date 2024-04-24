@@ -5,8 +5,9 @@ namespace sctp
 {
 
 
-DataReceiver::DataReceiver(uint32_t initialTsn) :
-	cumulativeTsn(uint64_t(initialTsn) - 1)
+DataReceiver::DataReceiver(uint32_t initialTsn, Listener& listner) :
+	cumulativeTsn(initialTsn),
+	listener(listener)
 {
 }
 
@@ -23,6 +24,10 @@ bool DataReceiver::HandlePayloadChunk(std::shared_ptr<PayloadDataChunk> chunk)
 	//	delay.  If a packet arrives with duplicate DATA chunk(s) bundled with
 	//	new DATA chunks, the endpoint MAY immediately send a SACK.
 	bool duplicated = it != receivedTsns.begin() && *(--it)!=tsn;
+	if (!duplicated)
+	{
+		payloadDataChunks[tsn] = chunk;
+	}
 	
 	//rfc4960#page-89
 	//	Upon the reception of a new DATA chunk, an endpoint shall examine the
@@ -120,8 +125,22 @@ std::shared_ptr<SelectiveAcknowledgementChunk> DataReceiver::generateSackChunk()
 		
 		//Remove everything up to the cumulative sequence number
 		if (cumulativeTsn==current)
+		{
 			//Erase and move
 			it = receivedTsns.erase(it);
+			
+			// Notify data received
+			auto data = payloadDataChunks[current];
+			
+			auto payload = std::make_unique<Payload>();
+			payload->streamId = data->streamIdentifier;
+			payload->data = std::move(data->userData);
+			payload->type = PayloadType(data->payloadProtocolIdentifier);
+			
+			listener.OnDataReceived(std::move(payload));
+			
+			payloadDataChunks.erase(current);
+		}
 		else
 			//Next
 			++it;

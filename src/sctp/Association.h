@@ -5,6 +5,8 @@
 #include <set>
 
 #include "Datachannels.h"
+#include "sctp/DataReceiver.h"
+#include "sctp/DataSender.h"
 #include "sctp/SequenceNumberWrapper.h"
 #include "sctp/PacketHeader.h"
 #include "sctp/Stream.h"
@@ -22,7 +24,7 @@ namespace sctp
 
 using AssociationFsm = fsm::StateMachine<ClosedState, CookieWaitState, CookieEchoedState, EstablishedState>;
 
-class Association : public datachannels::Transport
+class Association : public datachannels::Transport, public DataReceiver::Listener, public DataSender::Transmitter
 {
 
 public:
@@ -74,6 +76,9 @@ public:
 		return timeService;
 	}
 	
+	void OnDataReceived(std::unique_ptr<Payload> data) override {};
+	void Enqueue(std::vector<std::shared_ptr<Chunk>> chunkBundle) override {};
+
 private:
 
 	std::list<Chunk::shared> queue;

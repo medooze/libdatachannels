@@ -89,8 +89,12 @@ size_t Association::WritePacket(uint8_t *data, uint32_t size)
 		auto chunk = Chunk::Parse(reader);
 		//Check 
 		if (!chunk)
+		{
+			fsm.handle(ProcessedEvent{});
+			
 			//Error
 			return false;
+		}
 		
 		//Process it
 		fsm.handle(ChunkEvent{chunk});

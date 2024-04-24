@@ -31,6 +31,7 @@ public:
 	virtual void Cancel() = 0;
 	virtual void Again(const std::chrono::milliseconds& ms) = 0;
 	virtual std::chrono::milliseconds GetRepeat() const = 0;
+	virtual bool IsScheduled() const = 0;
 };
 	
 class TimeService
@@ -41,6 +42,7 @@ public:
 	virtual Timer::shared CreateTimer(std::function<void(std::chrono::milliseconds)> callback) = 0;
 	virtual Timer::shared CreateTimer(const std::chrono::milliseconds& ms, std::function<void(std::chrono::milliseconds)> timeout) = 0;
 	virtual Timer::shared CreateTimer(const std::chrono::milliseconds& ms, const std::chrono::milliseconds& repeat, std::function<void(std::chrono::milliseconds)> timeout) = 0;
+	virtual void Async(const std::function<void(std::chrono::milliseconds)>& func) = 0;
 };
 
 struct Ports
