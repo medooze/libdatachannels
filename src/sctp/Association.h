@@ -64,11 +64,6 @@ public:
 		fsm.handle(event);
 	}
 	
-	inline uint32_t GetLocalAdvertisedReceiverWindowCredit() const
-	{
-		return localAdvertisedReceiverWindowCredit;
-	}
-	
 	inline datachannels::TimeService& GetTimeService()
 	{
 		return timeService;
@@ -86,8 +81,6 @@ private:
 	
 	uint16_t localPort = 0;
 	uint16_t remotePort = 0;
-	uint32_t localAdvertisedReceiverWindowCredit = 0xFFFFFFFF;
-	uint32_t remoteAdvertisedReceiverWindowCredit = 0;
 	uint32_t localVerificationTag = 0;
 	uint32_t remoteVerificationTag = 0;
 	

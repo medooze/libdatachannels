@@ -43,7 +43,7 @@ fsm::Nothing EstablishedState::handle(const ChunkEvent& event)
 	}
 	else if(chunk->type == Chunk::Type::SACK)
 	{
-		dataSender->handleSackChunk(std::static_pointer_cast<SelectiveAcknowledgementChunk>(chunk));
+		dataSender->HandleSackChunk(std::static_pointer_cast<SelectiveAcknowledgementChunk>(chunk));
 	}
 	
 	return fsm::Nothing{};

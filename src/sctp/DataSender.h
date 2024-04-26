@@ -82,9 +82,9 @@ public:
 	DataSender(datachannels::TimeService& timeService, Transmitter& transmitter, uint32_t localInitialTsn, uint32_t remoteAdvertisedReceiverWindowCredit);
 	~DataSender();
 	
-	bool send(std::shared_ptr<Payload> data);
+	bool Send(std::shared_ptr<Payload> data);
 	
-	void handleSackChunk(std::shared_ptr<SelectiveAcknowledgementChunk> chunk);
+	void HandleSackChunk(std::shared_ptr<SelectiveAcknowledgementChunk> chunk);
 	
 	inline void SetRtt(uint32_t rtt);
 	
@@ -95,9 +95,9 @@ private:
 
 	datachannels::TimeService& timeService;
 	Transmitter &transmitter;
-	uint32_t cumulativeTsnAckPoint;
+	uint32_t cumulativeTsnAckPoint = 0;
 	
-	uint32_t remoteAdveritsedReceiverWindowCredit;
+	uint32_t remoteAdveritsedReceiverWindowCredit = 0;
 	
 	std::set<uint64_t> unackedTsns;
 	std::map<uint64_t, std::shared_ptr<PayloadDataChunk>> payloadDataChunks;
