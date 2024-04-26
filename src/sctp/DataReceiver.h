@@ -3,7 +3,7 @@
 
 #include "SequenceNumberWrapper.h"
 #include "Chunk.h"
-#include "Payload.h"
+#include "sctp/Payload.h"
 #include "Datachannels.h"
 
 #include <stdint.h>
@@ -26,7 +26,7 @@ public:
 	{
 	public:
 		virtual ~Listener() = default;
-		virtual void OnDataReceived(std::unique_ptr<sctp::Payload> data) = 0;
+		virtual void OnDataReceived(uint16_t streamId, std::unique_ptr<sctp::Payload> data) = 0;
 	};
 	
 	DataReceiver(datachannels::TimeService& timeService, Transmitter& transmitter, uint32_t remoteInitialTsn, uint32_t localAdvertisedReceiverWindowCredit, Listener& listener);

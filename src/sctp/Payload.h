@@ -15,7 +15,6 @@ enum PayloadType
 
 struct Payload
 {
-	uint16_t streamId;
 	PayloadType type;
 	Buffer data;
 };

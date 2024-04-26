@@ -89,9 +89,9 @@ public:
 	
 	// Upper level interfaces
 	
-	void OnDataReceived(std::unique_ptr<sctp::Payload> data) override;
+	void OnDataReceived(uint16_t streamId, std::unique_ptr<sctp::Payload> data) override;
 	
-	bool SendData(std::unique_ptr<sctp::Payload> data);
+	bool SendData(uint16_t streamId, std::unique_ptr<sctp::Payload> data);
 private:
 
 	std::list<Chunk::shared> queue;

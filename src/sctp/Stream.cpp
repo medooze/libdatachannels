@@ -26,9 +26,7 @@ bool Stream::Recv(std::unique_ptr<sctp::Payload> payload)
 
 bool Stream::Send(std::unique_ptr<sctp::Payload> payload)
 {
-	payload->streamId = id;
-
-	return association.SendData(std::move(payload));
+	return association.SendData(id, std::move(payload));
 }
 
 void Stream::SetListener(Listener* listener)

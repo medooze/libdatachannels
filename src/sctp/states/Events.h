@@ -48,6 +48,7 @@ struct TimeoutEvent : public Event
 
 struct SendEvent : public Event
 {
+	uint16_t streamId;
 	std::shared_ptr<sctp::Payload> payload;
 };
 

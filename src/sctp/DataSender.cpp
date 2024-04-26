@@ -21,10 +21,10 @@ DataSender::~DataSender()
 	}
 }
 
-bool DataSender::Send(std::shared_ptr<sctp::Payload> data)
+bool DataSender::Send(uint16_t streamId, std::shared_ptr<sctp::Payload> data)
 {
 	std::weak_ptr<DataSender> weak = shared_from_this();
-	timeService.Async([weak, data](std::chrono::milliseconds) {
+	timeService.Async([weak, streamId, data](std::chrono::milliseconds) {
 		auto self = weak.lock();
 		if (!self) return;
 		
@@ -38,20 +38,20 @@ bool DataSender::Send(std::shared_ptr<sctp::Payload> data)
 		chunk->transmissionSequenceNumber = self->unackedTsns.empty() ? 
 			(self->cumulativeTsnAckPoint + 1) : *(--self->unackedTsns.end()) + 1;
 			
-		chunk->streamIdentifier = data->streamId;
+		chunk->streamIdentifier = streamId;
 		chunk->payloadProtocolIdentifier = uint32_t(data->type);
 		chunk->userData = std::move(data->data);
 		
-		if (self->streamSequenceNumbers.find(data->streamId) == self->streamSequenceNumbers.end())
+		if (self->streamSequenceNumbers.find(streamId) == self->streamSequenceNumbers.end())
 		{
-			self->streamSequenceNumbers[data->streamId] = 0;
+			self->streamSequenceNumbers[streamId] = 0;
 		}
 		else
 		{
-			self->streamSequenceNumbers[data->streamId] = self->streamSequenceNumbers[data->streamId] + 1;
+			self->streamSequenceNumbers[streamId] = self->streamSequenceNumbers[streamId] + 1;
 		}
 		
-		chunk->streamSequenceNumber = self->streamSequenceNumbers[data->streamId];
+		chunk->streamSequenceNumber = self->streamSequenceNumbers[streamId];
 		
 		auto wrapped = self->tsnWrapper.Wrap(chunk->transmissionSequenceNumber);
 		self->payloadDataChunks[wrapped] = chunk;

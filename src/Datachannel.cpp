@@ -30,7 +30,6 @@ bool Datachannel::Send(MessageType type, const uint8_t* data, const uint64_t siz
 	if (state != State::Established) return false;
 	
 	auto payload = std::make_unique<sctp::Payload>();
-	payload->streamId = stream->GetId();	
 	
 	if (!data || !size)
 	{
