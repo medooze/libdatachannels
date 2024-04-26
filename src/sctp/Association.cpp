@@ -29,7 +29,7 @@ Association::~Association()
 {
 	fsm.handle(ShutdownEvent{});
 	
-	// @todo Wait until state closed.
+	// Not clean shutdown. Clean shutdown should be through Shutdown() call and wait for state change
 }
 
 bool Association::Associate()
