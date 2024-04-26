@@ -8,8 +8,7 @@ namespace impl
 {
 
 Endpoint::Endpoint(datachannels::TimeService& timeService, datachannels::OnDataPendingListener& listener) :
-	association(timeService, listener),
-	factory(association)
+	association(timeService, listener)
 {
 	
 }
@@ -20,14 +19,16 @@ Endpoint::~Endpoint()
 	association.Abort();
 }
 
-bool Endpoint::Init(const Options& options, bool associate)
+bool Endpoint::Init(const Options& options)
 {
+	factory = std::make_unique<DataChannelFactory>(association, mode);
+	
 	//Set ports on sctp
 	association.SetLocalPort(options.ports.localPort);
 	association.SetRemotePort(options.ports.remotePort);
 	
 	//If we are clients
-	if (associate)
+	if (options.mode == Mode::Client)
 		//Start association
 		return association.Associate();
 	
@@ -37,7 +38,9 @@ bool Endpoint::Init(const Options& options, bool associate)
 
 Datachannel::shared Endpoint::CreateDatachannel(const Datachannel::Options& options)
 {
-	return nullptr;
+	if (!factory) return nullptr;
+	
+	return factory->CreateDataChannel();
 }
 
 bool Endpoint::Close()

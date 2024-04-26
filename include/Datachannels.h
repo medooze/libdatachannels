@@ -93,16 +93,23 @@ public:
 class Endpoint
 {
 public:
+	enum class Mode
+	{
+		Sever,
+		Client
+	};
+	
 	struct Options
 	{
 		Ports ports;
+		Mode mode = Mode::Sever;
 	};
 	
 	using shared = std::shared_ptr<Endpoint>;
 	
 public:
 	virtual ~Endpoint() = default;
-	virtual bool Init(const Options& options, bool associate) = 0;
+	virtual bool Init(const Options& options) = 0;
 	virtual Datachannel::shared CreateDatachannel(const Datachannel::Options& options)  = 0;
 	virtual bool Close()  = 0;
 	
@@ -116,12 +123,6 @@ class Sctp
 {
 public:
 	using shared = std::shared_ptr<Sctp>;
-	
-	enum class Mode
-	{
-		Client,
-		Server
-	};
 	
 	virtual Transport& GetTransport() = 0;
 	virtual bool Close() = 0;

@@ -11,6 +11,15 @@ Datachannel::Datachannel(const sctp::Stream::shared& stream)
 	stream->SetListener(this);
 }
 
+Datachannel::Datachannel(sctp::Association& association, uint16_t id)
+{
+	this->stream = std::make_shared<sctp::Stream>(association, id);
+	stream->SetListener(this);
+	
+	Open();
+}
+
+
 Datachannel::~Datachannel()
 {
 	stream->SetListener(nullptr);
@@ -21,8 +30,7 @@ bool Datachannel::Send(MessageType type, const uint8_t* data, const uint64_t siz
 	if (state != State::Established) return false;
 	
 	auto payload = std::make_unique<sctp::Payload>();
-	payload->streamId = stream->GetId();
-	payload->data = Buffer(data, size);
+	payload->streamId = stream->GetId();	
 	
 	if (!data || !size)
 	{
@@ -37,6 +45,7 @@ bool Datachannel::Send(MessageType type, const uint8_t* data, const uint64_t siz
 	else 
 	{
 		payload->type = type==UTF8 ? sctp::PayloadType::WebRTCString : sctp::PayloadType::WebRTCBinary;
+		payload->data = Buffer(data, size);
 	}
 	
 	return stream->Send(std::move(payload));
@@ -64,7 +73,7 @@ void Datachannel::OnMessage(std::unique_ptr<sctp::Payload> payload)
 {
 	if (state == State::Unestablished)
 	{
-		
+		// @todo Hanlde DECP messsages
 	}
 	else if (state == State::Established)
 	{
@@ -74,6 +83,11 @@ void Datachannel::OnMessage(std::unique_ptr<sctp::Payload> payload)
 	{
 		Error("Unexpected state\n");
 	}
+}
+
+void Datachannel::Open()
+{
+	// @todo DCEP
 }
 
 }; //namespace impl

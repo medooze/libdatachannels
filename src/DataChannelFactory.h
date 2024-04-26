@@ -10,18 +10,22 @@ namespace datachannels::impl
 class DataChannelFactory : public sctp::Association::Listener
 {
 public:
-	DataChannelFactory(sctp::Association& association);
+	DataChannelFactory(sctp::Association& association, Endpoint::Mode mode);
 	
 	std::shared_ptr<Datachannel> CreateDataChannel();
 	
-	const std::vector<std::shared_ptr<Datachannel>> & GetDataChannels() const;
+	const std::map<uint16_t, std::shared_ptr<Datachannel>> & GetDataChannels() const;
 	
 	virtual void OnStreamCreated(const sctp::Stream::shared& stream) override;
 	
 private:
-	sctp::Association& association;
 	
-	std::vector<std::shared_ptr<Datachannel>> dataChannels;
+	uint16_t allocateStreamId();
+
+	sctp::Association& association;
+	Endpoint::Mode mode;
+	
+	std::map<uint16_t, std::shared_ptr<Datachannel>> dataChannels;
 };	
 	
 }

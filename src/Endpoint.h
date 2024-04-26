@@ -15,7 +15,7 @@ public:
 	Endpoint(TimeService& timeService, datachannels::OnDataPendingListener& listener);
 	virtual ~Endpoint();
 	
-	virtual bool Init(const Options& options, bool associate)  override;
+	virtual bool Init(const Options& options)  override;
 	virtual Datachannel::shared CreateDatachannel(const Datachannel::Options& options)  override;
 	virtual bool Close()  override;
 	
@@ -25,8 +25,9 @@ public:
 	virtual datachannels::Transport& GetTransport() override;
 private:
 	sctp::Association association;
+	Endpoint::Mode mode = Endpoint::Mode::Sever;
 	
-	DataChannelFactory factory;
+	std::unique_ptr<DataChannelFactory> factory;
 };
 
 }; //namespace impl

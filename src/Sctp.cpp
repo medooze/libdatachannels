@@ -41,7 +41,8 @@ size_t Sctp::WritePacket(uint8_t *data, uint32_t size)
 	}
 	else
 	{
-		endpoint = AddEndpoint({ports});
+		// Request from client, current endpoint is server mode
+		endpoint = AddEndpoint({ports, Endpoint::Mode::Sever});
 	}
 	
 	return endpoint->GetTransport().WritePacket(data, size);
@@ -58,14 +59,14 @@ bool Sctp::Close()
 	return true;
 }
 
-std::shared_ptr<Endpoint> Sctp::AddEndpoint(const Endpoint::Options& options, bool associate)
+std::shared_ptr<Endpoint> Sctp::AddEndpoint(const Endpoint::Options& options)
 {
 	// @todo Check whether the ports exists already
 	
 	auto endpoint = std::make_shared<Endpoint>(timeService, listener);
 	endpoints[options.ports] = endpoint;
 	
-	if (!endpoint->Init(options, associate))
+	if (!endpoint->Init(options))
 	{
 		endpoints.erase(options.ports);
 		return nullptr;

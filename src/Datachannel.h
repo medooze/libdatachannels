@@ -15,6 +15,8 @@ class Datachannel : public datachannels::Datachannel, public sctp::Stream::Liste
 {
 public:
 	Datachannel(const sctp::Stream::shared& stream);
+	Datachannel(sctp::Association& association, uint16_t id);
+	
 	virtual ~Datachannel();
 	
 	virtual bool Send(MessageType type, const uint8_t* data, const uint64_t size) override;
@@ -29,6 +31,8 @@ private:
 		Unestablished,
 		Established	
 	};
+	
+	void Open();
 	
 	State state = State::Unestablished;
 

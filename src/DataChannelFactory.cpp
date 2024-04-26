@@ -3,12 +3,23 @@
 namespace datachannels::impl
 {
 
-std::shared_ptr<Datachannel> DataChannelFactory::CreateDataChannel()
+DataChannelFactory::DataChannelFactory(sctp::Association& association, Endpoint::Mode mode) :
+	association(association),
+	mode(mode)
 {
-	return nullptr;
 }
 
-const std::vector<std::shared_ptr<Datachannel>> & DataChannelFactory::GetDataChannels() const
+std::shared_ptr<Datachannel> DataChannelFactory::CreateDataChannel()
+{
+	auto id = allocateStreamId();
+	auto channel = std::make_shared<Datachannel>(association, id);
+	
+	dataChannels[id] = channel;
+	
+	return channel;
+}
+
+const std::map<uint16_t, std::shared_ptr<Datachannel>>& DataChannelFactory::GetDataChannels() const
 {
 	return dataChannels;
 }
@@ -16,7 +27,28 @@ const std::vector<std::shared_ptr<Datachannel>> & DataChannelFactory::GetDataCha
 void DataChannelFactory::OnStreamCreated(const sctp::Stream::shared& stream)
 {
 	auto channel = std::make_shared<Datachannel>(stream);
-	dataChannels.push_back(channel);
+	dataChannels[stream->GetId()] = channel;
+}
+
+uint16_t DataChannelFactory::allocateStreamId()
+{
+	auto maxStreamId = 0;
+	if (!dataChannels.empty())
+	{
+		maxStreamId = (--dataChannels.end())->first;
+	}
+	
+	auto isEven = maxStreamId % 2 == 0;
+	if (mode == Endpoint::Mode::Sever)
+	{
+		// Server mode uses odd number
+		return isEven ? (maxStreamId + 1) : (maxStreamId + 2);
+	}
+	else
+	{
+		// Client mode uses even number
+		return isEven ? (maxStreamId + 2) : (maxStreamId + 1);
+	}
 }
 
 }
