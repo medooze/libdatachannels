@@ -20,7 +20,7 @@ public:
 
 	EstablishedState(Association& association);
 	
-	template <typename Event> void onEnter(const Event& event, const std::pair<uint32_t, uint32_t>& parameters);
+	template <typename Event> void onEnter(const Event& event, const std::tuple<uint32_t, uint32_t, uint32_t, uint32_t>& parameters);
 	template <typename Event> void onLeave(const Event& event);
 	
 	fsm::Nothing handle(const ChunkEvent& event);

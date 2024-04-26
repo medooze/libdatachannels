@@ -23,13 +23,16 @@ public:
 	template<typename Event> void onEnter(const Event& event);
 	template<typename Event> void onLeave(const Event& event);
 	
-	fsm::Maybe<fsm::ParameterizedTransitionTo<EstablishedState, std::pair<uint32_t, uint32_t>>> handle(const ChunkEvent& event);
+	fsm::Maybe<fsm::ParameterizedTransitionTo<EstablishedState, std::tuple<uint32_t, uint32_t, uint32_t, uint32_t>>> handle(const ChunkEvent& event);
 	fsm::Maybe<fsm::ParameterizedTransitionTo<CookieWaitState, InitiationChunk::shared>> handle(const AssociateEvent& event);
 	
 private:
 	Association& association;
 	
-	uint32_t initialTsn = 0;
+	uint32_t localInitialTsn = 0;
+	uint32_t remoteInitialTsn = 0;
+	uint32_t localAdvertisedReceiverWindowCredit = 0xFFFFFFFF;
+	uint32_t remoteAdvertisedReceiverWindowCredit = 0;
 };
 
 }

@@ -5,10 +5,12 @@
 namespace sctp
 {
 
-DataReceiver::DataReceiver(datachannels::TimeService& timeService, Transmitter& transmitter, uint32_t initialTsn, Listener& listener) :
+DataReceiver::DataReceiver(datachannels::TimeService& timeService, Transmitter& transmitter, uint32_t remoteInitialTsn, 
+				uint32_t localAdvertisedReceiverWindowCredit, Listener& listener) :
 	timeService(timeService),
 	transmitter(transmitter),
-	cumulativeTsn(initialTsn),
+	cumulativeTsn(remoteInitialTsn),
+	localAdvertisedReceiverWindowCredit(localAdvertisedReceiverWindowCredit),
 	listener(listener)
 {
 }

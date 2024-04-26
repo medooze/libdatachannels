@@ -15,12 +15,14 @@ EstablishedState::EstablishedState(Association& association) :
 	
 }
 template <typename Event>
-void EstablishedState::onEnter(const Event& event, const std::pair<uint32_t, uint32_t>& parameters)
+void EstablishedState::onEnter(const Event& event, const std::tuple<uint32_t, uint32_t, uint32_t, uint32_t>& parameters)
 {
 	Debug("Enter established state\n");
 	
-	dataReceiver = std::make_shared<DataReceiver>(association.GetTimeService(), association, parameters.first, association);
-	dataSender = std::make_shared<DataSender>(association.GetTimeService(), association, parameters.second);
+	auto [localInitialTsn, localAdvertisedReceiverWindowCredit, remoteInitialTsn, remoteAdveritsedReceiverWindowCredit] = parameters;
+	
+	dataReceiver = std::make_shared<DataReceiver>(association.GetTimeService(), association, remoteInitialTsn, localAdvertisedReceiverWindowCredit, association);
+	dataSender = std::make_shared<DataSender>(association.GetTimeService(), association, localInitialTsn, remoteAdveritsedReceiverWindowCredit);
 }
 
 template <typename Event>

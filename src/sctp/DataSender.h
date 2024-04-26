@@ -79,7 +79,7 @@ public:
 	
 	static constexpr uint32_t PayloadPoolSize = 1000;
 	
-	DataSender(datachannels::TimeService& timeService, Transmitter& transmitter, uint32_t initialTsn);
+	DataSender(datachannels::TimeService& timeService, Transmitter& transmitter, uint32_t localInitialTsn, uint32_t remoteAdvertisedReceiverWindowCredit);
 	~DataSender();
 	
 	bool send(std::shared_ptr<Payload> data);

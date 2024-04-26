@@ -3,10 +3,11 @@
 namespace sctp
 {
 
-DataSender::DataSender(datachannels::TimeService& timeService, Transmitter& transmitter, uint32_t initialTsn) :
+DataSender::DataSender(datachannels::TimeService& timeService, Transmitter& transmitter, uint32_t localInitialTsn, uint32_t remoteAdvertisedReceiverWindowCredit) :
 	timeService(timeService),
 	transmitter(transmitter),
-	cumulativeTsnAckPoint(initialTsn - 1)
+	cumulativeTsnAckPoint(localInitialTsn - 1),
+	remoteAdveritsedReceiverWindowCredit(remoteAdvertisedReceiverWindowCredit)
 {
 }
 

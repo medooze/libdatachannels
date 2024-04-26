@@ -29,16 +29,11 @@ public:
 		virtual void OnDataReceived(std::unique_ptr<Payload> data) = 0;
 	};
 	
-	DataReceiver(datachannels::TimeService& timeService, Transmitter& transmitter, uint32_t initialTsn, Listener& listener);
+	DataReceiver(datachannels::TimeService& timeService, Transmitter& transmitter, uint32_t remoteInitialTsn, uint32_t localAdvertisedReceiverWindowCredit, Listener& listener);
 	~DataReceiver();
 
 	void HandlePayloadChunk(std::shared_ptr<PayloadDataChunk> chunk);
 	void HanldePacketProcessed();
-	
-	inline uint32_t GetLocalAdvertisedReceiverWindowCredit() const
-	{
-		return localAdvertisedReceiverWindowCredit;
-	}
 	
 private:
 	void Acknowledge();
@@ -48,10 +43,10 @@ private:
 	datachannels::TimeService& timeService;
 	Transmitter &transmitter;
 	uint64_t cumulativeTsn = 0;
+	uint32_t localAdvertisedReceiverWindowCredit = 0xFFFFFFFF;
 	Listener& listener;
 	
 	TsnWrapper receivedTsnWrapper;
-	uint32_t localAdvertisedReceiverWindowCredit = 0xFFFFFFFF;
 	bool initialised = false;
 	
 	std::multiset<uint64_t> receivedTsns;
