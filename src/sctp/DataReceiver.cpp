@@ -1,17 +1,29 @@
 
 #include "DataReceiver.h"
+#include "Transmitter.h"
 
 namespace sctp
 {
 
-
-DataReceiver::DataReceiver(uint32_t initialTsn, Listener& listner) :
+DataReceiver::DataReceiver(datachannels::TimeService& timeService, Transmitter& transmitter, uint32_t initialTsn, Listener& listener) :
+	timeService(timeService),
+	transmitter(transmitter),
 	cumulativeTsn(initialTsn),
 	listener(listener)
 {
 }
 
-bool DataReceiver::HandlePayloadChunk(std::shared_ptr<PayloadDataChunk> chunk)
+DataReceiver::~DataReceiver()
+{
+	// Stop timer
+	if (sackTimer)
+	{
+		sackTimer->Cancel();
+		sackTimer.reset();
+	}
+}
+
+void DataReceiver::HandlePayloadChunk(std::shared_ptr<PayloadDataChunk> chunk)
 {
 	//Get tsn
 	auto tsn = receivedTsnWrapper.Wrap(chunk->transmissionSequenceNumber);
@@ -52,13 +64,59 @@ bool DataReceiver::HandlePayloadChunk(std::shared_ptr<PayloadDataChunk> chunk)
 		prev = curr;
 	}
 	
-	if (!initialised)
-	{
-		initialised = true;
-		return true;
-	}
+	//rfc4960#page-78
+	//	When the receiver's advertised window is 0, the receiver MUST drop
+	//	any new incoming DATA chunk with a TSN larger than the largest TSN
+	//	received so far.  If the new incoming DATA chunk holds a TSN value
+	//	less than the largest TSN received so far, then the receiver SHOULD
+	//	drop the largest TSN held for reordering and accept the new incoming
+	//	DATA chunk.  In either case, if such a DATA chunk is dropped, the
+	//	receiver MUST immediately send back a SACK with the current receive
+	//	window showing only DATA chunks received and accepted so far.  The
+	//	dropped DATA chunk(s) MUST NOT be included in the SACK, as they were
+	//	not accepted. 
 	
-	return duplicated || hasGaps;
+	//We need to acknoledfe
+	pendingAcknowledge = true;
+	
+	//If we need to send it now
+	if (!initialised || duplicated || hasGaps)
+		//Acknoledge now
+		pendingAcknowledgeTimeout = 0ms; 
+	else 
+		//Create timer
+		pendingAcknowledgeTimeout = SackTimeout; 
+	
+	
+	initialised = true;
+}
+
+void DataReceiver::HanldePacketProcessed()
+{	
+	//If we need to acknowledge
+	if (pendingAcknowledge)
+	{
+		//If we have to do it now
+		if (pendingAcknowledgeTimeout == 0ms)
+			//Acknoledge now
+			Acknowledge();
+		//rfc4960#page-78
+		//	Specifically, an
+		//	acknowledgement SHOULD be generated for at least every second packet
+		//	(not every second DATA chunk) received, and SHOULD be generated
+		//	within 200 ms of the arrival of any unacknowledged DATA chunk.
+
+		//If there was already a timeout
+		else if (sackTimer.get())
+			//We should do sack now
+			Acknowledge();
+		else
+			//Schedule timer
+			sackTimer = timeService.CreateTimer(pendingAcknowledgeTimeout,[this](...){
+				//In the future
+				Acknowledge();
+			});
+	}	
 }
 
 std::shared_ptr<SelectiveAcknowledgementChunk> DataReceiver::generateSackChunk()
@@ -162,5 +220,27 @@ std::shared_ptr<SelectiveAcknowledgementChunk> DataReceiver::generateSackChunk()
 	
 	return sack;
 }
+
+void DataReceiver::Acknowledge()
+{
+	//New sack message
+	auto sack = generateSackChunk();
+	
+	//Send it
+	transmitter.Enqueue(sack);
+	
+	//No need to acknoledge
+	pendingAcknowledge = false;
+	
+	//Reset any pending sack timer
+	if (sackTimer)
+	{
+		//Cancel it
+		sackTimer->Cancel();
+		//Reset it
+		sackTimer = nullptr;
+	}
+}
+
 
 }

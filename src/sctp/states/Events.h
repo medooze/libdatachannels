@@ -9,7 +9,7 @@ struct ChunkEvent
 	Chunk::shared chunk;
 };
 
-struct ProcessedEvent
+struct PacketProcessedEvent
 {	
 };
 

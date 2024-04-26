@@ -5,11 +5,11 @@
 #include "Chunk.h"
 #include "Datachannels.h"
 #include "Payload.h"
+#include "Transmitter.h"
 
 #include <stdint.h>
 #include <set>
 #include <stdlib.h> 
-
 
 namespace sctp
 {
@@ -79,14 +79,8 @@ public:
 	
 	static constexpr uint32_t PayloadPoolSize = 1000;
 	
-	class Transmitter
-	{
-	public:
-		virtual ~Transmitter() = default;
-		virtual void Enqueue(std::vector<std::shared_ptr<Chunk>> chunkBundle) = 0;
-	};
-	
-	DataSender(datachannels::TimeService& timeService, uint32_t initialTsn, Transmitter& transmitter);
+	DataSender(datachannels::TimeService& timeService, Transmitter& transmitter, uint32_t initialTsn);
+	~DataSender();
 	
 	bool send(std::shared_ptr<Payload> data);
 	
@@ -100,10 +94,10 @@ private:
 	void startRtxTimer(bool restart = false);
 
 	datachannels::TimeService& timeService;
-	uint32_t cumulativeTsnAckPoint;
-	uint32_t remoteAdveritsedReceiverWindowCredit;
-	
 	Transmitter &transmitter;
+	uint32_t cumulativeTsnAckPoint;
+	
+	uint32_t remoteAdveritsedReceiverWindowCredit;
 	
 	std::set<uint64_t> unackedTsns;
 	std::map<uint64_t, std::shared_ptr<PayloadDataChunk>> payloadDataChunks;

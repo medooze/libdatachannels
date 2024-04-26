@@ -3,11 +3,21 @@
 namespace sctp
 {
 
-DataSender::DataSender(datachannels::TimeService& timeService, uint32_t initialTsn, Transmitter& transmitter) :
+DataSender::DataSender(datachannels::TimeService& timeService, Transmitter& transmitter, uint32_t initialTsn) :
 	timeService(timeService),
-	cumulativeTsnAckPoint(initialTsn - 1),
-	transmitter(transmitter)
+	transmitter(transmitter),
+	cumulativeTsnAckPoint(initialTsn - 1)
 {
+}
+
+DataSender::~DataSender()
+{
+	// Stop timer
+	if (rtxTimer)
+	{
+		rtxTimer->Cancel();
+		rtxTimer.reset();
+	}
 }
 
 bool DataSender::send(std::shared_ptr<Payload> data)
@@ -48,7 +58,7 @@ bool DataSender::send(std::shared_ptr<Payload> data)
 		
 		if (chunk->transmissionSequenceNumber == self->cumulativeTsnAckPoint + 1)
 		{
-			self->transmitter.Enqueue({chunk});
+			self->transmitter.Enqueue(chunk);
 			
 			self->startRtxTimer();
 		}

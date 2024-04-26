@@ -90,9 +90,8 @@ size_t Association::WritePacket(uint8_t *data, uint32_t size)
 		//Check 
 		if (!chunk)
 		{
-			fsm.handle(ProcessedEvent{});
-			
 			//Error
+			fsm.handle(PacketProcessedEvent{});
 			return false;
 		}
 		
@@ -100,7 +99,7 @@ size_t Association::WritePacket(uint8_t *data, uint32_t size)
 		fsm.handle(ChunkEvent{chunk});
 	}
 	
-	fsm.handle(ProcessedEvent{});
+	fsm.handle(PacketProcessedEvent{});
 	
 	//Done
 	return true;
@@ -184,6 +183,20 @@ void Association::Enqueue(const Chunk::shared& chunk)
 	bool wasPending = pendingData;
 	//Push back
 	queue.push_back(chunk);
+	//Reset flag
+	pendingData = true;
+	//If it is first
+	if (!wasPending)
+		listener.OnDataPending();
+}
+
+void Association::Enqueue(const std::vector<Chunk::shared>& chunkBundle)
+{
+	if (chunkBundle.empty()) return;
+	
+	bool wasPending = pendingData;
+	//Push back
+	queue.insert(queue.end(), chunkBundle.begin(), chunkBundle.end());
 	//Reset flag
 	pendingData = true;
 	//If it is first
