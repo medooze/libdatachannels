@@ -8,25 +8,38 @@ namespace impl
 Datachannel::Datachannel(const sctp::Stream::shared& stream)
 {
 	this->stream = stream;
-	this->stream->OnMessage([&](const uint8_t ppid, const uint8_t* buffer, const size_t size){
-		
-	});
+	stream->SetListener(this);
+}
+
+Datachannel::~Datachannel()
+{
+	stream->SetListener(nullptr);
 }
 	
 bool Datachannel::Send(MessageType type, const uint8_t* data, const uint64_t size)
 {
-	uint8_t empty = 0;
+	if (state != State::Established) return false;
+	
+	auto payload = std::make_unique<sctp::Payload>();
+	payload->streamId = stream->GetId();
+	payload->data = Buffer(data, size);
 	
 	if (!data || !size)
+	{
 		//   SCTP does not support the sending of empty user messages.  Therefore,
 		//   if an empty message has to be sent, the appropriate PPID (WebRTC
 		//   String Empty or WebRTC Binary Empty) is used and the SCTP user
 		//   message of one zero byte is sent.  When receiving an SCTP user
 		//   message with one of these PPIDs, the receiver MUST ignore the SCTP
-		//   user message and process it as an empty message.		
-		return stream->Send(type==UTF8 ? WebRTCStringEmpty : WebRTCBinaryEmpty, &empty, 1);
+		//   user message and process it as an empty message.
+		payload->type = type==UTF8 ? sctp::PayloadType::WebRTCStringEmpty : sctp::PayloadType::WebRTCBinaryEmpty;
+	}
 	else 
-		return stream->Send(type==UTF8 ? WebRTCString : WebRTCBinary, data, size);
+	{
+		payload->type = type==UTF8 ? sctp::PayloadType::WebRTCString : sctp::PayloadType::WebRTCBinary;
+	}
+	
+	return stream->Send(std::move(payload));
 }
 
 bool Datachannel::Close()
@@ -45,6 +58,22 @@ bool Datachannel::Close()
 	//   [RFC6525] also guarantees that all the messages are delivered (or
 	//   abandoned) before the stream is reset.	
 	return true;
+}
+
+void Datachannel::OnMessage(std::unique_ptr<sctp::Payload> payload)
+{
+	if (state == State::Unestablished)
+	{
+		
+	}
+	else if (state == State::Established)
+	{
+		
+	}
+	else
+	{
+		Error("Unexpected state\n");
+	}
 }
 
 }; //namespace impl

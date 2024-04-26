@@ -3,39 +3,36 @@
 #include "Datachannels.h"
 
 #include "sctp/Stream.h"
+#include "sctp/Payload.h"
+
+#include <memory>
 
 namespace datachannels
 {
 namespace impl
 {
-	
-class Datachannel : public datachannels::Datachannel
+class Datachannel : public datachannels::Datachannel, public sctp::Stream::Listener
 {
 public:
-	enum Payload 
-	{
-		WebRTCString	  = 51,
-		WebRTCBinary	  = 53,
-		WebRTCStringEmpty = 56,
-		WebRTCBinaryEmpty = 57,
-		
-	};
-	
-public:
 	Datachannel(const sctp::Stream::shared& stream);
-	virtual ~Datachannel() = default;
-	virtual bool Send(MessageType type, const uint8_t* data = nullptr, const uint64_t size = 0) override;
+	virtual ~Datachannel();
+	
+	virtual bool Send(MessageType type, const uint8_t* data, const uint64_t size) override;
 	virtual bool Close() override;
 	
 	// Event handlers
-	virtual void OnMessage(const std::function<void(MessageType, const uint8_t*,uint64_t)>& callback) override
-	{
-		//Store callback
-		onMessage = callback;
-	}	
+	virtual void OnMessage(std::unique_ptr<sctp::Payload> payload) override;
+	
 private:
+	enum class State
+	{
+		Unestablished,
+		Established	
+	};
+	
+	State state = State::Unestablished;
+
 	sctp::Stream::shared stream;
-	std::function<void(MessageType, const uint8_t*,uint64_t)> onMessage;
 };
 
 }; //namespace impl

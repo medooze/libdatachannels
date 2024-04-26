@@ -2,6 +2,7 @@
 #define DATACHANNEL_IMPL_ENDPOINT_H_
 #include "Datachannels.h"
 #include "sctp/Association.h"
+#include "DataChannelFactory.h"
 
 namespace datachannels
 {
@@ -24,6 +25,8 @@ public:
 	virtual datachannels::Transport& GetTransport() override;
 private:
 	sctp::Association association;
+	
+	DataChannelFactory factory;
 };
 
 }; //namespace impl

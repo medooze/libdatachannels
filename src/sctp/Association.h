@@ -26,8 +26,14 @@ using AssociationFsm = fsm::StateMachine<ClosedState, CookieWaitState, CookieEch
 
 class Association : public datachannels::Transport, public DataReceiver::Listener, public Transmitter
 {
-
 public:
+
+	class Listener
+	{
+	public:
+		virtual void OnStreamCreated(const sctp::Stream::shared& stream) = 0;
+	};
+
 	Association(datachannels::TimeService& timeService, datachannels::OnDataPendingListener& listener);
 	virtual ~Association();
 	
@@ -43,10 +49,22 @@ public:
 	
 	void SetLocalVerificationTag(uint32_t tag) { localVerificationTag = tag; }
 	void SetRemoteVerificationTag(uint32_t tag) { remoteVerificationTag = tag; }
-	  
+	
+	inline void SetListener(Listener* listener)
+	{
+		this->listener = listener;
+	}
+	
+	inline datachannels::TimeService& GetTimeService()
+	{
+		return timeService;
+	}
+	
+	// Interfaces to transport
+	
 	virtual size_t ReadPacket(uint8_t *data, uint32_t size) override;
 	virtual size_t WritePacket(uint8_t *data, uint32_t size) override;
-	
+		
 	inline size_t ReadPacket(Buffer& buffer)
 	{
 		size_t len = ReadPacket(buffer.GetData(),buffer.GetCapacity());
@@ -63,17 +81,17 @@ public:
 	{
 		fsm.handle(event);
 	}
+
+	// Interfaces for chunk
 	
-	inline datachannels::TimeService& GetTimeService()
-	{
-		return timeService;
-	}
-	
-	void OnDataReceived(std::unique_ptr<Payload> data) override {};
-		
 	void Enqueue(const Chunk::shared& chunk) override;
 	void Enqueue(const std::vector<Chunk::shared>& chunkBundle) override;
 	
+	// Upper level interfaces
+	
+	void OnDataReceived(std::unique_ptr<sctp::Payload> data) override;
+	
+	bool SendData(std::unique_ptr<sctp::Payload> data);
 private:
 
 	std::list<Chunk::shared> queue;
@@ -88,7 +106,9 @@ private:
 
 	std::map<uint16_t,Stream::shared> streams;
 	
-	datachannels::OnDataPendingListener& listener;
+	datachannels::OnDataPendingListener& dataPendingListener;
+	
+	Listener* listener = nullptr;
 	
 	ClosedState closedState;
 	CookieWaitState cookieWaitState;

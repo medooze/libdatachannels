@@ -7,6 +7,8 @@
 #include <memory>
 
 #include "Buffer.h"
+#include "Payload.h"
+#include <memory>
 
 
 namespace sctp
@@ -19,27 +21,28 @@ class Stream
 public:
 	using shared = std::shared_ptr<Stream>;
 public:
+	class Listener
+	{
+	public:
+		virtual ~Listener() = default;
+		virtual void OnMessage(std::unique_ptr<sctp::Payload> payload) = 0;
+	};
+
 	Stream(Association &association, uint16_t id);
 	virtual ~Stream();
 	
-	bool Recv(const uint8_t ppid, const uint8_t* buffer, const size_t size);
-	bool Send(const uint8_t ppid, const uint8_t* buffer, const size_t size);
+	bool Recv(std::unique_ptr<sctp::Payload> payload);
+	bool Send(std::unique_ptr<sctp::Payload> payload);
 	
 	uint16_t GetId() const { return id; }
 	
-	// Event handlers
-	void OnMessage(std::function<void(uint8_t, const uint8_t*,uint64_t)> callback)
-	{
-		//Store callback
-		onMessage = callback;
-	}
+	void SetListener(Listener* listener);
+	
 private:
 	uint16_t id;
 	Association &association;
-	std::list<std::pair<uint8_t,Buffer>> outgoingMessages;
-	Buffer incomingMessage;
 	
-	std::function<void(uint8_t, const uint8_t*,uint64_t)> onMessage;
+	Listener* listener = nullptr;
 };
 
 }; // namespace

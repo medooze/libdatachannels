@@ -1,5 +1,6 @@
 #ifndef LIBDATACHANNELS_H_
 #define LIBDATACHANNELS_H_
+
 #include <stdint.h>
 #include <chrono>
 #include <memory>
@@ -70,10 +71,6 @@ public:
 	virtual ~Datachannel() = default;
 	virtual bool Send(MessageType type, const uint8_t* data = nullptr, const uint64_t size = 0)  = 0;
 	virtual bool Close() = 0;
-	
-	// Event handlers
-	virtual void OnMessage(const std::function<void(MessageType, const uint8_t*,uint64_t)>& callback) = 0;
-	
 };
 
 class OnDataPendingListener

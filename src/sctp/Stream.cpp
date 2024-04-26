@@ -1,4 +1,5 @@
 #include "sctp/Stream.h"
+#include "sctp/Association.h"
 
 namespace sctp
 {
@@ -13,23 +14,26 @@ Stream::~Stream()
 {
 }
 
-bool Stream::Recv(const uint8_t ppid, const uint8_t* buffer, const size_t size) //first,last?
+bool Stream::Recv(std::unique_ptr<sctp::Payload> payload)
 {
-	//onMessage(ppid,buff)
+	if (listener)
+	{
+		listener->OnMessage(std::move(payload));
+	}
+	
 	return true;
 }
 
-bool Stream::Send(const uint8_t ppid, const uint8_t* buffer, const size_t size)
+bool Stream::Send(std::unique_ptr<sctp::Payload> payload)
 {
-	//TODO: check max queue size?
-	
-	//Add new message to ougogin queue
-	outgoingMessages.push_back(std::make_pair<>(ppid,Buffer(buffer,size)));
-	
-	//TODO: signal pending data
-	
-	//done
-	return true;
+	payload->streamId = id;
+
+	return association.SendData(std::move(payload));
+}
+
+void Stream::SetListener(Listener* listener)
+{
+	this->listener = listener;
 }
 
 }; // namespace sctp

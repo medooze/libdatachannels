@@ -82,7 +82,7 @@ public:
 	DataSender(datachannels::TimeService& timeService, Transmitter& transmitter, uint32_t localInitialTsn, uint32_t remoteAdvertisedReceiverWindowCredit);
 	~DataSender();
 	
-	bool Send(std::shared_ptr<Payload> data);
+	bool Send(std::shared_ptr<sctp::Payload> data);
 	
 	void HandleSackChunk(std::shared_ptr<SelectiveAcknowledgementChunk> chunk);
 	

@@ -21,7 +21,7 @@ DataSender::~DataSender()
 	}
 }
 
-bool DataSender::Send(std::shared_ptr<Payload> data)
+bool DataSender::Send(std::shared_ptr<sctp::Payload> data)
 {
 	std::weak_ptr<DataSender> weak = shared_from_this();
 	timeService.Async([weak, data](std::chrono::milliseconds) {

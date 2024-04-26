@@ -16,7 +16,7 @@ std::uniform_int_distribution<unsigned long> dis{1, 4294967295};
 
 Association::Association(datachannels::TimeService& timeService, datachannels::OnDataPendingListener &listener) :
 	timeService(timeService),
-	listener(listener),
+	dataPendingListener(listener),
 	closedState(*this),
 	cookieWaitState(*this),
 	cookieEchoedState(*this),
@@ -187,7 +187,7 @@ void Association::Enqueue(const Chunk::shared& chunk)
 	pendingData = true;
 	//If it is first
 	if (!wasPending)
-		listener.OnDataPending();
+		dataPendingListener.OnDataPending();
 }
 
 void Association::Enqueue(const std::vector<Chunk::shared>& chunkBundle)
@@ -201,7 +201,37 @@ void Association::Enqueue(const std::vector<Chunk::shared>& chunkBundle)
 	pendingData = true;
 	//If it is first
 	if (!wasPending)
-		listener.OnDataPending();
+		dataPendingListener.OnDataPending();
+}
+
+void Association::OnDataReceived(std::unique_ptr<sctp::Payload> data)
+{
+	if (streams.find(data->streamId) == streams.end())
+	{
+		streams[data->streamId] = std::make_shared<Stream>(*this, data->streamId);
+		// OnStreamCreated
+		if (listener)
+		{
+			listener->OnStreamCreated(streams[data->streamId]);
+		}
+	}
+	
+	streams[data->streamId]->Recv(std::move(data));
+}
+
+bool Association::SendData(std::unique_ptr<sctp::Payload> data)
+{
+	auto event = std::make_shared<SendEvent>();
+	event->payload = std::move(data);
+	
+	SendEvent::ProcessResult result = SendEvent::ProcessResult::Unprocessed;
+	event->callback = [&result](SendEvent::ProcessResult res){
+		result = res;
+	};
+	
+	fsm.handle(event);
+	
+	return result == SendEvent::ProcessResult::Success;
 }
 
 }; //namespace sctp

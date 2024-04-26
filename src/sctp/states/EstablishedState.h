@@ -25,6 +25,7 @@ public:
 	
 	fsm::Nothing handle(const ChunkEvent& event);
 	fsm::Nothing handle(const PacketProcessedEvent& event);
+	fsm::Nothing handle(const SendEvent& event);
 	
 private:
 	

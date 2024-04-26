@@ -8,7 +8,8 @@ namespace impl
 {
 
 Endpoint::Endpoint(datachannels::TimeService& timeService, datachannels::OnDataPendingListener& listener) :
-	association(timeService, listener)
+	association(timeService, listener),
+	factory(association)
 {
 	
 }
