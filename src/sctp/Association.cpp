@@ -96,7 +96,7 @@ size_t Association::WritePacket(uint8_t *data, uint32_t size)
 		}
 		
 		//Process it
-		fsm.handle(ChunkEvent{chunk});
+		fsm.handle(ChunkEvent{std::nullopt, chunk});
 	}
 	
 	fsm.handle(PacketProcessedEvent{});
@@ -224,14 +224,14 @@ bool Association::SendData(std::unique_ptr<sctp::Payload> data)
 	auto event = std::make_shared<SendEvent>();
 	event->payload = std::move(data);
 	
-	SendEvent::ProcessResult result = SendEvent::ProcessResult::Unprocessed;
-	event->callback = [&result](SendEvent::ProcessResult res){
+	EventResult result = EventResult::Unprocessed;
+	event->callback = [&result](EventResult res){
 		result = res;
 	};
 	
 	fsm.handle(event);
 	
-	return result == SendEvent::ProcessResult::Success;
+	return result == EventResult::Success;
 }
 
 }; //namespace sctp

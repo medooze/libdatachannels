@@ -59,7 +59,9 @@ fsm::Nothing EstablishedState::handle(const PacketProcessedEvent& event)
 fsm::Nothing EstablishedState::handle(const SendEvent& event)
 {
 	bool sent = dataSender->Send(event.payload);
-	event.callback(sent ? SendEvent::ProcessResult::Success : SendEvent::ProcessResult::Failed);
+	
+	if (event.callback)
+		(*event.callback)(sent ? EventResult::Success : EventResult::Failed);
 	
 	return fsm::Nothing{};
 }

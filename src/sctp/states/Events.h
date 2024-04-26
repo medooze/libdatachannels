@@ -9,42 +9,46 @@
 namespace sctp
 {
 
-struct ChunkEvent
+enum class EventResult
+{
+	Unprocessed,
+	Success,
+	Failed	
+};
+
+struct Event
+{
+	std::optional<std::function<void(EventResult)>> callback;	
+};
+
+struct ChunkEvent : public Event
 {
 	Chunk::shared chunk;
 };
 
-struct PacketProcessedEvent
-{	
-};
-
-struct AssociateEvent
+struct PacketProcessedEvent : public Event
 {
 };
 
-struct ShutdownEvent
-{	
-};
-
-struct AbortEvent
-{	
-};
-
-struct TimeoutEvent 
+struct AssociateEvent : public Event
 {
 };
 
-struct SendEvent
+struct ShutdownEvent : public Event
 {
-	enum class ProcessResult
-	{
-		Unprocessed,
-		Success,
-		Failed	
-	};
-	
+};
+
+struct AbortEvent : public Event
+{	
+};
+
+struct TimeoutEvent : public Event
+{
+};
+
+struct SendEvent : public Event
+{
 	std::shared_ptr<sctp::Payload> payload;
-	std::function<void(ProcessResult)> callback;	
 };
 
 };
