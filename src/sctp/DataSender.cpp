@@ -63,6 +63,9 @@ bool DataSender::send(std::shared_ptr<Payload> data)
 			self->startRtxTimer();
 		}
 	});
+	
+	// @todo check if receiver is OK to receive.
+	return true;
 }
 
 void DataSender::SetRtt(uint32_t rtt)

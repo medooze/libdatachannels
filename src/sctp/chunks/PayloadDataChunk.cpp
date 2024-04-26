@@ -62,6 +62,8 @@ Chunk::shared PayloadDataChunk::Parse(BufferReader& reader)
 	uint8_t flag	= reader.Get1(); 
 	uint16_t length	= reader.Get2();
 	
+	(void)mark;
+	
 	//Check type
 	if (type!=Type::PDATA)
 		//Error

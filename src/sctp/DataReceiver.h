@@ -47,8 +47,8 @@ private:
 
 	datachannels::TimeService& timeService;
 	Transmitter &transmitter;
-	Listener& listener;
 	uint64_t cumulativeTsn = 0;
+	Listener& listener;
 	
 	TsnWrapper receivedTsnWrapper;
 	uint32_t localAdvertisedReceiverWindowCredit = 0xFFFFFFFF;

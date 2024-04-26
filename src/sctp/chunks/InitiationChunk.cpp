@@ -196,7 +196,11 @@ Chunk::shared InitiationChunk::Parse(BufferReader& reader)
 	uint8_t type	= reader.Get1();
 	uint8_t flag	= reader.Get1(); //Ignored, should be 0
 	uint16_t length	= reader.Get2();
-	
+
+	(void)mark;
+	(void)flag;
+	(void)length;
+		
 	//Check type
 	if (type!=Type::INIT)
 		//Error
@@ -263,6 +267,7 @@ Chunk::shared InitiationChunk::Parse(BufferReader& reader)
 				//parameter MUST silently discard this parameter and continue
 				//processing the rest of the INIT chunk.
 				reader.Skip(reader.GetLeft());
+				[[fallthrough]];
 			default:
 				//Unkonwn
 				init->unknownParameters.push_back(std::make_pair<uint8_t,Buffer>(paramType,paramReader.GetBuffer(paramReader.GetLeft())));

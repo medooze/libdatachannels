@@ -46,6 +46,10 @@ Chunk::shared ShutdownCompleteChunk::Parse(BufferReader& reader)
 	uint8_t type	= reader.Get1();
 	uint8_t flag	= reader.Get1(); //Ignored, should be 0
 	uint16_t length	= reader.Get2();
+
+	(void)mark;
+	(void)flag;
+	(void)length;
 	
 	//Check type
 	if (type!=Type::SHUTDOWN_COMPLETE)
