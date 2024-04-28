@@ -18,7 +18,7 @@ bool Stream::Recv(std::unique_ptr<sctp::Payload> payload)
 {
 	if (listener)
 	{
-		listener->OnMessage(std::move(payload));
+		listener->OnPayload(std::move(payload));
 	}
 	
 	return true;

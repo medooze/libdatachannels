@@ -1,6 +1,8 @@
 #ifndef LIBDATACHANNELS_H_
 #define LIBDATACHANNELS_H_
 
+#include "Message.h"
+
 #include <stdint.h>
 #include <chrono>
 #include <memory>
@@ -55,12 +57,7 @@ struct Ports
 class Datachannel
 {
 public:
-	enum MessageType
-	{
-		UTF8,
-		Binary
-	};
-	
+
 	struct Options
 	{
 		
@@ -69,7 +66,7 @@ public:
 	using shared = std::shared_ptr<Datachannel>;
 public:
 	virtual ~Datachannel() = default;
-	virtual bool Send(MessageType type, const uint8_t* data = nullptr, const uint64_t size = 0)  = 0;
+	virtual bool Send(datachannels::MessageType type, const uint8_t* data = nullptr, const uint64_t size = 0)  = 0;
 	virtual bool Close() = 0;
 };
 

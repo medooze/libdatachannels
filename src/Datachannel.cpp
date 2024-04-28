@@ -25,7 +25,7 @@ Datachannel::~Datachannel()
 	stream->SetListener(nullptr);
 }
 	
-bool Datachannel::Send(MessageType type, const uint8_t* data, const uint64_t size)
+bool Datachannel::Send(datachannels::MessageType type, const uint8_t* data, const uint64_t size)
 {
 	if (state != State::Established) return false;
 	
@@ -39,11 +39,11 @@ bool Datachannel::Send(MessageType type, const uint8_t* data, const uint64_t siz
 		//   message of one zero byte is sent.  When receiving an SCTP user
 		//   message with one of these PPIDs, the receiver MUST ignore the SCTP
 		//   user message and process it as an empty message.
-		payload->type = type==UTF8 ? sctp::PayloadType::WebRTCStringEmpty : sctp::PayloadType::WebRTCBinaryEmpty;
+		payload->type = type==datachannels::MessageType::UTF8 ? sctp::PayloadType::WebRTCStringEmpty : sctp::PayloadType::WebRTCBinaryEmpty;
 	}
 	else 
 	{
-		payload->type = type==UTF8 ? sctp::PayloadType::WebRTCString : sctp::PayloadType::WebRTCBinary;
+		payload->type = type==datachannels::MessageType::UTF8 ? sctp::PayloadType::WebRTCString : sctp::PayloadType::WebRTCBinary;
 		payload->data = Buffer(data, size);
 	}
 	
@@ -68,7 +68,7 @@ bool Datachannel::Close()
 	return true;
 }
 
-void Datachannel::OnMessage(std::unique_ptr<sctp::Payload> payload)
+void Datachannel::OnPayload(std::unique_ptr<sctp::Payload> payload)
 {
 	if (state == State::Unestablished)
 	{

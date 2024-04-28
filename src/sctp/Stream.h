@@ -25,7 +25,7 @@ public:
 	{
 	public:
 		virtual ~Listener() = default;
-		virtual void OnMessage(std::unique_ptr<sctp::Payload> payload) = 0;
+		virtual void OnPayload(std::unique_ptr<sctp::Payload> payload) = 0;
 	};
 
 	Stream(Association &association, uint16_t id);
