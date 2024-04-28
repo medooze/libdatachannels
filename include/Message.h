@@ -1,5 +1,5 @@
-#ifndef MESSAGE_H
-#define MESSAGE_H
+#ifndef DATACHANNELS_MESSAGE_H
+#define DATACHANNELS_MESSAGE_H
 
 #include <cstdint>
 #include <cstring>
