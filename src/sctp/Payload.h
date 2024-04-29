@@ -6,7 +6,7 @@ namespace sctp
 
 enum PayloadType
 {
-	DECP 		  = 50,
+	DCEP 		  = 50,
 	WebRTCString	  = 51,
 	WebRTCBinary	  = 53,
 	WebRTCStringEmpty = 56,

@@ -117,6 +117,14 @@ void DataSender::HandleSackChunk(std::shared_ptr<SelectiveAcknowledgementChunk> 
 		earlistTsn = *unackedTsns.begin();
 	}
 	
+	for (auto it = unackedTsns.begin(); it!= unackedTsns.end();)
+	{
+		if (*it <= wrappedCumulativeTsnAck)
+		{
+			it = unackedTsns.erase(it);
+		}
+	}
+	
 	bool missing = false;
 	uint32_t pos = 0;
 	for (auto& gap : chunk->gapAckBlocks)
@@ -166,7 +174,7 @@ void DataSender::HandleSackChunk(std::shared_ptr<SelectiveAcknowledgementChunk> 
 	}
 	else if (unackedTsns.empty())
 	{
-		rtxTimer->Cancel();
+		if (rtxTimer) rtxTimer->Cancel();
 	}
 }
 

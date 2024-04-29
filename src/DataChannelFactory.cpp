@@ -7,6 +7,7 @@ DataChannelFactory::DataChannelFactory(sctp::Association& association, Endpoint:
 	association(association),
 	mode(mode)
 {
+	association.SetListener(this);
 }
 
 std::shared_ptr<Datachannel> DataChannelFactory::CreateDataChannel()
@@ -26,6 +27,8 @@ const std::map<uint16_t, std::shared_ptr<Datachannel>>& DataChannelFactory::GetD
 
 void DataChannelFactory::OnStreamCreated(const sctp::Stream::shared& stream)
 {
+	Debug("DataChannelFactory::OnStreamCreated: %d\n", stream->GetId());
+	
 	auto channel = std::make_shared<Datachannel>(stream);
 	dataChannels[stream->GetId()] = channel;
 }

@@ -1,4 +1,5 @@
 #include "Datachannel.h"
+#include "internal/BufferReader.h"
 
 namespace datachannels
 {
@@ -70,13 +71,37 @@ bool Datachannel::Close()
 
 void Datachannel::OnPayload(std::unique_ptr<sctp::Payload> payload)
 {
+	Debug("Datachannel::OnPayload\n");
+		
+	BufferReader reader(payload->data);
+	
 	if (state == State::Unestablished)
 	{
-		// @todo Hanlde DECP messsages
+		if (payload->type == sctp::PayloadType::DCEP)
+		{
+			if (ParseOpenMessage(reader))
+			{
+				std::unique_ptr<sctp::Payload> ack = std::make_unique<sctp::Payload>();
+				ack->type = sctp::PayloadType::DCEP;
+				
+				uint8_t ackType = DATA_CHANNEL_ACK;
+				ack->data = Buffer(&ackType, 1);
+				
+				Dump();
+				
+				stream->Send(std::move(ack));
+				
+				state = State::Established;
+			}
+		}
 	}
 	else if (state == State::Established)
 	{
-		
+		if (payload->type == sctp::PayloadType::WebRTCString)
+		{
+			std::string str((char*)payload->data.GetData(), payload->data.GetSize());
+			Debug("Received string: %s\n", str.c_str());
+		}
 	}
 	else
 	{
@@ -87,6 +112,61 @@ void Datachannel::OnPayload(std::unique_ptr<sctp::Payload> payload)
 void Datachannel::Open()
 {
 	// @todo DCEP
+}
+
+bool Datachannel::ParseOpenMessage(BufferReader& reader)
+{
+	if (reader.GetSize() < 1)
+	{
+		Debug("Invalid DCEP message\n");
+		return false;
+	}
+	
+	auto msgType = reader.Get1();
+	if (msgType != DATA_CHANNEL_OPEN)
+	{
+		Debug("Message type is not DATA_CHANNEL_OPEN, 0x%x\n", msgType);
+		return false;
+	}
+	
+	if (reader.GetLeft() < 11)
+	{
+		Debug("Invalid DATA_CHANNEL_OPEN message size.\n");
+		return false;
+	}
+	
+	auto chnType = reader.Get1();
+	auto prio= reader.Get2();
+	auto reliability = reader.Get4();
+	
+	auto labelLen = reader.Get2();
+	auto protocolLen = reader.Get2();
+	
+	if (reader.GetLeft() < (labelLen + protocolLen))
+	{
+		Debug("Invalid DATA_CHANNEL_OPEN message size.\n");
+		return false;
+	}
+	
+	// Set members
+	channelType = ChannelType(chnType);
+	priority = prio;
+	reliabilityParameters = reliability;
+	
+	label.assign(reinterpret_cast<const char *>(reader.GetData(labelLen)), labelLen);
+	subprotocol.assign(reinterpret_cast<const char *>(reader.GetData(protocolLen)), protocolLen);
+	
+	return true;
+}
+	
+void Datachannel::Dump() const
+{
+	Debug("Data channel Info:\n");
+	Debug("channelType: 0x%x\n", channelType);
+	Debug("priority: %d\n", int(priority));
+	Debug("reliabilityParameters:: %d\n", reliabilityParameters);
+	Debug("label: %s\n", label.c_str());
+	Debug("subprotocol: %s\n", subprotocol.c_str());	
 }
 
 }; //namespace impl

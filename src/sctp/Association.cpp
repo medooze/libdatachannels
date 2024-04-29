@@ -221,12 +221,12 @@ void Association::OnDataReceived(uint16_t streamId, std::unique_ptr<sctp::Payloa
 
 bool Association::SendData(uint16_t streamId, std::unique_ptr<sctp::Payload> data)
 {
-	auto event = std::make_shared<SendEvent>();
-	event->streamId = streamId;
-	event->payload = std::move(data);
+	SendEvent event;
+	event.streamId = streamId;
+	event.payload = std::move(data);
 	
 	EventResult result = EventResult::Unprocessed;
-	event->callback = [&result](EventResult res){
+	event.callback = [&result](EventResult res){
 		result = res;
 	};
 	
