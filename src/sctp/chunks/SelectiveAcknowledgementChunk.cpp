@@ -75,8 +75,7 @@ Chunk::shared SelectiveAcknowledgementChunk::Parse(BufferReader& reader)
 	uint8_t type	= reader.Get1();
 	uint8_t flag	= reader.Get1(); //Ignored, should be 0
 	uint16_t length	= reader.Get2();
-
-	(void)mark;
+	
 	(void)flag;
 		
 	//Check type
@@ -117,12 +116,12 @@ Chunk::shared SelectiveAcknowledgementChunk::Parse(BufferReader& reader)
 		//Read gap
 		ack->duplicateTuplicateTrasnmissionSequenceNumbers.push_back(reader.Get4());
 	}
-	
+
 	//Check size
-	if (!reader.Assert(length-16)) 
+	if (reader.GetOffset(mark) != length)
 		//Error
 		return nullptr;
-		
+
 	//Done
 	return std::static_pointer_cast<Chunk>(ack);
 }

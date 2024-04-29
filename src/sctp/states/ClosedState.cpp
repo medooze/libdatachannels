@@ -15,6 +15,8 @@ using namespace sctp;
 ClosedState::ClosedState(Association& association) :
 	association(association)
 {
+	localInitialTsn = 1000;   // @todo Use a random number
+	association.SetLocalVerificationTag(0);
 }
 
 template<typename Event>
@@ -23,7 +25,6 @@ void ClosedState::onEnter(const Event& event)
 	Debug("Enter closed state\n");
 	
 	localInitialTsn = 1000;   // @todo Use a random number
-	
 	association.SetLocalVerificationTag(0);
 }
 

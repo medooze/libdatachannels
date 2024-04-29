@@ -231,6 +231,8 @@ void DataReceiver::Acknowledge()
 	//Send it
 	transmitter.Enqueue(sack);
 	
+	Debug("Enqueued sack\n");
+	
 	//No need to acknoledge
 	pendingAcknowledge = false;
 	

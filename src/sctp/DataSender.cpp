@@ -60,6 +60,7 @@ bool DataSender::Send(uint16_t streamId, std::shared_ptr<sctp::Payload> data)
 		if (chunk->transmissionSequenceNumber == self->cumulativeTsnAckPoint + 1)
 		{
 			self->transmitter.Enqueue(chunk);
+			Debug("Enqueued payload %d\n", chunk->userData.GetSize());
 			
 			self->startRtxTimer();
 		}
@@ -93,10 +94,12 @@ void DataSender::checkRetransmission()
 	
 	if (!bundle.empty())
 	{
+		Debug("Retransmittion: %d\n", bundle.size());
 		transmitter.Enqueue(bundle);
+		
+		startRtxTimer();
 	}
 	
-	startRtxTimer();
 }
 	
 void DataSender::HandleSackChunk(std::shared_ptr<SelectiveAcknowledgementChunk> chunk)
@@ -107,7 +110,12 @@ void DataSender::HandleSackChunk(std::shared_ptr<SelectiveAcknowledgementChunk> 
 	auto wrappedCumulativeTsnAckPoint = tsnWrapper.Wrap(cumulativeTsnAckPoint);
 	
 	// If Cumulative TSN Ack is less than the Cumulative TSN Ack Point, then drop the SACK chunk.
-	if (wrappedCumulativeTsnAck < wrappedCumulativeTsnAckPoint) return;
+	if (wrappedCumulativeTsnAck < wrappedCumulativeTsnAckPoint && 
+	    (wrappedCumulativeTsnAck > TsnWrapper::OutOfOrderWindow || wrappedCumulativeTsnAckPoint == 0xFFFFFFFF))
+	{
+		Debug("Unexpected TSN: %ld cumulativeTsnAckPoint: %ld\n", chunk->cumulativeTrasnmissionSequenceNumberAck, cumulativeTsnAckPoint);
+		return;
+	}
 	
 	cumulativeTsnAckPoint = chunk->cumulativeTrasnmissionSequenceNumberAck;
 	
@@ -156,6 +164,8 @@ void DataSender::HandleSackChunk(std::shared_ptr<SelectiveAcknowledgementChunk> 
 		Debug("Receiver got duplicated tsns.\n");
 	}
 	
+	Debug("Unacked tsns: %zu, cumulativeTsnAckPoint: %u \n", unackedTsns.size(), cumulativeTsnAckPoint);
+	
 	if (missing)
 	{
 		// Whenever a SACK chunk is received missing a TSN that was previously 
@@ -182,6 +192,7 @@ void DataSender::HandleSackChunk(std::shared_ptr<SelectiveAcknowledgementChunk> 
 void DataSender::startRtxTimer(bool restart)
 {
 	std::chrono::milliseconds retransimissionTimeOut{rtoCalculator.GetRto()};
+	Debug("Start rtx timer: %d\n", retransimissionTimeOut.count());
 	
 	if (!rtxTimer)
 	{
