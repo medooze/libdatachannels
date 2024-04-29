@@ -131,6 +131,10 @@ void DataSender::HandleSackChunk(std::shared_ptr<SelectiveAcknowledgementChunk> 
 		{
 			it = unackedTsns.erase(it);
 		}
+		else
+		{
+			break;
+		}
 	}
 	
 	bool missing = false;
