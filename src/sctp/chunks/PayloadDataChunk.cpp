@@ -19,7 +19,7 @@ size_t PayloadDataChunk::Serialize(BufferWritter& writter) const
 	size_t ini = writter.Mark();
 	
 	//Creage flag
-	uint8_t flag = (unordered & 0x04) | (beginingFragment & 0x02) | (endingFragment & 0x01);
+	uint8_t flag = (unordered & 0x04) | (beginingFragment ? 0x02 : 0x0) | (endingFragment ? 0x01 : 0x0);
 	
 	//Write header
 	writter.Set1(type);

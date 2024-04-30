@@ -41,6 +41,9 @@ bool DataSender::Send(uint16_t streamId, std::shared_ptr<sctp::Payload> data)
 		chunk->streamIdentifier = streamId;
 		chunk->payloadProtocolIdentifier = uint32_t(data->type);
 		chunk->userData = std::move(data->data);
+		// We are not supporting fragmentation yet. Set it as a sole complete chunk.
+		chunk->beginingFragment = true;
+		chunk->endingFragment = true;
 		
 		if (self->streamSequenceNumbers.find(streamId) == self->streamSequenceNumbers.end())
 		{
