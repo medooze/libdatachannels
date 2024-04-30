@@ -2,7 +2,7 @@
 #define DATACHANNELFACTORY_H
 
 #include "sctp/Association.h"
-#include "Datachannel.h"
+#include "DataChannel.h"
 
 namespace datachannels::impl
 {
@@ -12,9 +12,9 @@ class DataChannelFactory : public sctp::Association::Listener
 public:
 	DataChannelFactory(sctp::Association& association, Endpoint::Mode mode);
 	
-	std::shared_ptr<Datachannel> CreateDataChannel();
+	std::shared_ptr<DataChannel> CreateDataChannel();
 	
-	const std::map<uint16_t, std::shared_ptr<Datachannel>> & GetDataChannels() const;
+	const std::map<uint16_t, std::shared_ptr<DataChannel>> & GetDataChannels() const;
 	
 	virtual void OnStreamCreated(const sctp::Stream::shared& stream) override;
 	
@@ -25,7 +25,7 @@ private:
 	sctp::Association& association;
 	Endpoint::Mode mode;
 	
-	std::map<uint16_t, std::shared_ptr<Datachannel>> dataChannels;
+	std::map<uint16_t, std::shared_ptr<DataChannel>> dataChannels;
 };	
 	
 }

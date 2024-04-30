@@ -12,11 +12,11 @@ namespace impl
 class Endpoint : public datachannels::Endpoint
 {
 public:
-	Endpoint(TimeService& timeService, datachannels::OnDataPendingListener& listener);
+	Endpoint(TimeService& timeService, datachannels::OnTransmissionPendingListener& listener);
 	virtual ~Endpoint();
 	
 	virtual bool Init(const Options& options)  override;
-	virtual Datachannel::shared CreateDatachannel(const Datachannel::Options& options)  override;
+	virtual DataChannel::shared CreateDataChannel(const DataChannel::Options& options)  override;
 	virtual bool Close()  override;
 	
 	// Getters

@@ -7,7 +7,7 @@ namespace datachannels
 namespace impl
 {
 
-Endpoint::Endpoint(datachannels::TimeService& timeService, datachannels::OnDataPendingListener& listener) :
+Endpoint::Endpoint(datachannels::TimeService& timeService, datachannels::OnTransmissionPendingListener& listener) :
 	association(timeService, listener)
 {
 	
@@ -36,7 +36,7 @@ bool Endpoint::Init(const Options& options)
 	return true;
 }
 
-Datachannel::shared Endpoint::CreateDatachannel(const Datachannel::Options& options)
+DataChannel::shared Endpoint::CreateDataChannel(const DataChannel::Options& options)
 {
 	if (!factory) return nullptr;
 	

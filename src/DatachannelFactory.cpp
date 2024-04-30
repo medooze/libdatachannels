@@ -20,7 +20,7 @@ std::shared_ptr<DataChannel> DataChannelFactory::CreateDataChannel()
 	return channel;
 }
 
-const std::map<uint16_t, std::shared_ptr<DataChannel>>& DataChannelFactory::GetDataChannels() const
+const std::map<uint16_t, std::shared_ptr<DataChannel>>& DataChannelFactory::GetDatachannels() const
 {
 	return dataChannels;
 }

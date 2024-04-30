@@ -5,7 +5,7 @@ using namespace datachannels;
 namespace datachannels::impl
 {
 	
-Sctp::Sctp(TimeService& timeService, datachannels::OnDataPendingListener& listener) : 
+Sctp::Sctp(TimeService& timeService, datachannels::OnTransmissionPendingListener& listener) : 
 	timeService(timeService), listener(listener) 
 {
 };

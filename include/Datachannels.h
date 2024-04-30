@@ -54,7 +54,7 @@ struct Ports
 	uint16_t remotePort = 5000;
 };
 
-class Datachannel
+class DataChannel
 {
 public:
 
@@ -63,20 +63,27 @@ public:
 		
 	};
 
-	using shared = std::shared_ptr<Datachannel>;
+	using shared = std::shared_ptr<DataChannel>;
 public:
-	virtual ~Datachannel() = default;
+	virtual ~DataChannel() = default;
 	virtual bool Send(datachannels::MessageType type, const uint8_t* data = nullptr, const uint64_t size = 0)  = 0;
 	virtual bool Close() = 0;
 };
 
-class OnDataPendingListener
+class OnTransmissionPendingListener
 {
 public:
-	virtual ~OnDataPendingListener() = default;
-	virtual void OnDataPending() = 0;
+	virtual ~OnTransmissionPendingListener() = default;
+	virtual void OnTransmissionPending() = 0;
 };
-	
+
+class OnDatachannelCreatedListener
+{
+public:
+	virtual ~OnDatachannelCreatedListener() = default;
+	virtual void OnDatachannelCreated(const std::shared_ptr<DataChannel>& datachannel) = 0;
+};
+
 class Transport
 {
 public:
@@ -107,7 +114,7 @@ public:
 public:
 	virtual ~Endpoint() = default;
 	virtual bool Init(const Options& options) = 0;
-	virtual Datachannel::shared CreateDatachannel(const Datachannel::Options& options)  = 0;
+	virtual DataChannel::shared CreateDataChannel(const DataChannel::Options& options)  = 0;
 	virtual bool Close()  = 0;
 	
 	// Getters

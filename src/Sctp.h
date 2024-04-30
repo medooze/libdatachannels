@@ -31,7 +31,7 @@ class Sctp : public datachannels::Sctp, public datachannels::Transport
 {
 public:
 	
-	Sctp(TimeService& timeService, datachannels::OnDataPendingListener& listener);
+	Sctp(TimeService& timeService, datachannels::OnTransmissionPendingListener& listener);
 
 	size_t ReadPacket(uint8_t *data, uint32_t size) override;
 	size_t WritePacket(uint8_t *data, uint32_t size) override; 
@@ -48,7 +48,7 @@ private:
 	TimeService& timeService;
 	std::unordered_map<Ports, std::shared_ptr<Endpoint>, PortsHash, PortsComp> endpoints;
 	
-	datachannels::OnDataPendingListener& listener;
+	datachannels::OnTransmissionPendingListener& listener;
 };
 
 }

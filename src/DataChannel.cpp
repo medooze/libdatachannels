@@ -1,4 +1,4 @@
-#include "Datachannel.h"
+#include "DataChannel.h"
 #include "internal/BufferReader.h"
 #include "sctp/Association.h"
 
@@ -7,7 +7,7 @@ namespace datachannels
 namespace impl
 {
 
-Datachannel::Datachannel(const sctp::Stream::shared& stream) :
+DataChannel::DataChannel(const sctp::Stream::shared& stream) :
 	timeService(stream->getAssociation().GetTimeService())
 {
 	this->stream = stream;
@@ -15,7 +15,7 @@ Datachannel::Datachannel(const sctp::Stream::shared& stream) :
 	stream->SetListener(this);
 }
 
-Datachannel::Datachannel(sctp::Association& association, uint16_t id) :
+DataChannel::DataChannel(sctp::Association& association, uint16_t id) :
 	timeService(association.GetTimeService())
 {
 	this->stream = association.createStream(id);
@@ -26,12 +26,12 @@ Datachannel::Datachannel(sctp::Association& association, uint16_t id) :
 }
 
 
-Datachannel::~Datachannel()
+DataChannel::~DataChannel()
 {
 	stream->SetListener(nullptr);
 }
 	
-bool Datachannel::Send(datachannels::MessageType type, const uint8_t* data, const uint64_t size)
+bool DataChannel::Send(datachannels::MessageType type, const uint8_t* data, const uint64_t size)
 {
 	if (state != State::Established) return false;
 	
@@ -56,7 +56,7 @@ bool Datachannel::Send(datachannels::MessageType type, const uint8_t* data, cons
 	return stream->Send(std::move(payload));
 }
 
-bool Datachannel::Close()
+bool DataChannel::Close()
 {
 	//   Closing of a data channel MUST be signaled by resetting the
 	//   corresponding outgoing streams [RFC6525].  This means that if one
@@ -74,9 +74,9 @@ bool Datachannel::Close()
 	return true;
 }
 
-void Datachannel::OnPayload(std::unique_ptr<sctp::Payload> payload)
+void DataChannel::OnPayload(std::unique_ptr<sctp::Payload> payload)
 {
-	Debug("Datachannel::OnPayload\n");
+	Debug("DataChannel::OnPayload\n");
 		
 	BufferReader reader(payload->data);
 	
@@ -135,12 +135,12 @@ void Datachannel::OnPayload(std::unique_ptr<sctp::Payload> payload)
 	}
 }
 
-void Datachannel::Open()
+void DataChannel::Open()
 {
 	// @todo DCEP
 }
 
-bool Datachannel::ParseOpenMessage(BufferReader& reader)
+bool DataChannel::ParseOpenMessage(BufferReader& reader)
 {
 	if (reader.GetSize() < 1)
 	{
@@ -185,9 +185,9 @@ bool Datachannel::ParseOpenMessage(BufferReader& reader)
 	return true;
 }
 
-void Datachannel::OnMessage(const std::shared_ptr<datachannels::Message>& message)
+void DataChannel::OnMessage(const std::shared_ptr<datachannels::Message>& message)
 {
-	std::weak_ptr<Datachannel> weak = shared_from_this();
+	std::weak_ptr<DataChannel> weak = shared_from_this();
 	timeService.Async([weak, message](...){
 		auto self = weak.lock();
 		if (!self) return;
@@ -196,9 +196,9 @@ void Datachannel::OnMessage(const std::shared_ptr<datachannels::Message>& messag
 	});
 }
 
-void Datachannel::AddMessageListener(const std::shared_ptr<MessageListener>& listener)
+void DataChannel::AddMessageListener(const std::shared_ptr<MessageListener>& listener)
 {
-	std::weak_ptr<Datachannel> weak = shared_from_this();
+	std::weak_ptr<DataChannel> weak = shared_from_this();
 	timeService.Async([weak, listener](...){
 		auto self = weak.lock();
 		if (!self) return;
@@ -207,9 +207,9 @@ void Datachannel::AddMessageListener(const std::shared_ptr<MessageListener>& lis
 	});
 }
 
-void Datachannel::RemoveMessageListener(const std::shared_ptr<MessageListener>& listener)
+void DataChannel::RemoveMessageListener(const std::shared_ptr<MessageListener>& listener)
 {
-	std::weak_ptr<Datachannel> weak = shared_from_this();
+	std::weak_ptr<DataChannel> weak = shared_from_this();
 	timeService.Async([weak, listener](...){
 		auto self = weak.lock();
 		if (!self) return;
@@ -218,7 +218,7 @@ void Datachannel::RemoveMessageListener(const std::shared_ptr<MessageListener>& 
 	});
 }
 	
-void Datachannel::Dump() const
+void DataChannel::Dump() const
 {
 	Debug("Data channel Info:\n");
 	Debug("channelType: 0x%x\n", channelType);

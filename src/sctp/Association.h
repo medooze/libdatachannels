@@ -33,7 +33,7 @@ public:
 		virtual void OnStreamCreated(const sctp::Stream::shared& stream) = 0;
 	};
 
-	Association(datachannels::TimeService& timeService, datachannels::OnDataPendingListener& listener);
+	Association(datachannels::TimeService& timeService, datachannels::OnTransmissionPendingListener& listener);
 	virtual ~Association();
 	
 	bool Associate();
@@ -108,7 +108,7 @@ private:
 
 	std::map<uint16_t,Stream::shared> streams;
 	
-	datachannels::OnDataPendingListener& dataPendingListener;
+	datachannels::OnTransmissionPendingListener& dataPendingListener;
 	
 	Listener* listener = nullptr;
 	

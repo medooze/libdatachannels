@@ -13,11 +13,11 @@ namespace datachannels
 {
 namespace impl
 {
-class Datachannel : public datachannels::Datachannel, 
+class DataChannel : public datachannels::DataChannel, 
 		public sctp::Stream::Listener, 
 		public datachannels::MessageProducer, 
 		public datachannels::MessageListener,
-		public std::enable_shared_from_this<Datachannel>
+		public std::enable_shared_from_this<DataChannel>
 {
 public:
 	// Message type
@@ -34,10 +34,10 @@ public:
 		DATA_CHANNEL_PARTIAL_RELIABLE_TIMED_UNORDERED	= 0x82
 	};
 
-	Datachannel(const sctp::Stream::shared& stream);
-	Datachannel(sctp::Association& association, uint16_t id);
+	DataChannel(const sctp::Stream::shared& stream);
+	DataChannel(sctp::Association& association, uint16_t id);
 	
-	virtual ~Datachannel();
+	virtual ~DataChannel();
 	
 	virtual bool Send(datachannels::MessageType type, const uint8_t* data, const uint64_t size) override;
 	virtual bool Close() override;
