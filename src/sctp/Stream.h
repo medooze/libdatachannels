@@ -38,6 +38,11 @@ public:
 	
 	void SetListener(Listener* listener);
 	
+	inline Association& getAssociation()
+	{
+		return association;
+	}
+	
 private:
 	uint16_t id;
 	Association &association;

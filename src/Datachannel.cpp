@@ -1,20 +1,25 @@
 #include "Datachannel.h"
 #include "internal/BufferReader.h"
+#include "sctp/Association.h"
 
 namespace datachannels
 {
 namespace impl
 {
 
-Datachannel::Datachannel(const sctp::Stream::shared& stream)
+Datachannel::Datachannel(const sctp::Stream::shared& stream) :
+	timeService(stream->getAssociation().GetTimeService())
 {
 	this->stream = stream;
+	
 	stream->SetListener(this);
 }
 
-Datachannel::Datachannel(sctp::Association& association, uint16_t id)
+Datachannel::Datachannel(sctp::Association& association, uint16_t id) :
+	timeService(association.GetTimeService())
 {
-	this->stream = std::make_shared<sctp::Stream>(association, id);
+	this->stream = association.createStream(id);
+	
 	stream->SetListener(this);
 	
 	Open();
@@ -93,14 +98,35 @@ void Datachannel::OnPayload(std::unique_ptr<sctp::Payload> payload)
 				
 				state = State::Established;
 			}
+			else
+			{
+				Debug("Failed to parse open message.");
+			}
 		}
 	}
 	else if (state == State::Established)
 	{
-		if (payload->type == sctp::PayloadType::WebRTCString)
+		auto type = datachannels::MessageType::UTF8;
+		
+		switch (payload->type)
 		{
-			std::string str((char*)payload->data.GetData(), payload->data.GetSize());
-			Debug("Received string: %s\n", str.c_str());
+		case sctp::PayloadType::WebRTCString:
+		case sctp::PayloadType::WebRTCStringEmpty:
+			type = datachannels::MessageType::UTF8;
+			break;
+		case sctp::PayloadType::WebRTCBinary:
+		case sctp::PayloadType::WebRTCBinaryEmpty:
+			type = datachannels::MessageType::UTF8;
+			break;
+		default:
+			Debug("Unexpected payload type: %d\n", type);
+			return;
+		}
+		
+		auto message = std::make_shared<datachannels::Message>(type, stream->getAssociation().GetLocalPort(), stream->GetId());
+		for (auto& listener : messageListeners)
+		{
+			listener->OnMessage(message);
 		}
 	}
 	else
@@ -158,6 +184,39 @@ bool Datachannel::ParseOpenMessage(BufferReader& reader)
 	
 	return true;
 }
+
+void Datachannel::OnMessage(const std::shared_ptr<datachannels::Message>& message)
+{
+	std::weak_ptr<Datachannel> weak = shared_from_this();
+	timeService.Async([weak, message](...){
+		auto self = weak.lock();
+		if (!self) return;
+		
+		self->Send(message->GetInfo().type, message->GetData(), message->GetLength());
+	});
+}
+
+void Datachannel::AddMessageListener(const std::shared_ptr<MessageListener>& listener)
+{
+	std::weak_ptr<Datachannel> weak = shared_from_this();
+	timeService.Async([weak, listener](...){
+		auto self = weak.lock();
+		if (!self) return;
+		
+		self->messageListeners.push_back(listener);
+	});
+}
+
+void Datachannel::RemoveMessageListener(const std::shared_ptr<MessageListener>& listener)
+{
+	std::weak_ptr<Datachannel> weak = shared_from_this();
+	timeService.Async([weak, listener](...){
+		auto self = weak.lock();
+		if (!self) return;
+		
+		self->messageListeners.remove(listener);
+	});
+}
 	
 void Datachannel::Dump() const
 {
@@ -166,7 +225,7 @@ void Datachannel::Dump() const
 	Debug("priority: %d\n", int(priority));
 	Debug("reliabilityParameters:: %d\n", reliabilityParameters);
 	Debug("label: %s\n", label.c_str());
-	Debug("subprotocol: %s\n", subprotocol.c_str());	
+	Debug("subprotocol: %s\n", subprotocol.c_str());
 }
 
 }; //namespace impl

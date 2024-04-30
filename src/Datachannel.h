@@ -13,7 +13,11 @@ namespace datachannels
 {
 namespace impl
 {
-class Datachannel : public datachannels::Datachannel, public sctp::Stream::Listener, public datachannels::MessageProducer, public datachannels::MessageListener
+class Datachannel : public datachannels::Datachannel, 
+		public sctp::Stream::Listener, 
+		public datachannels::MessageProducer, 
+		public datachannels::MessageListener,
+		public std::enable_shared_from_this<Datachannel>
 {
 public:
 	// Message type
@@ -42,9 +46,9 @@ public:
 	virtual void OnPayload(std::unique_ptr<sctp::Payload> payload) override;
 	
 	// Listener
-	virtual void OnMessage(const datachannels::Message& message) {};
-	virtual void AddMessageListener(const std::shared_ptr<MessageListener>& listener) {};
-	virtual void RemoveMessageListener(const std::shared_ptr<MessageListener>& listener) {};
+	virtual void OnMessage(const std::shared_ptr<Message>& message) override;
+	virtual void AddMessageListener(const std::shared_ptr<MessageListener>& listener) override;
+	virtual void RemoveMessageListener(const std::shared_ptr<MessageListener>& listener) override;
 	
 private:
 	enum class State
@@ -62,6 +66,7 @@ private:
 	State state = State::Unestablished;
 
 	sctp::Stream::shared stream;
+	datachannels::TimeService& timeService;
 	
 	// Channel parameters
 	ChannelType channelType = DATA_CHANNEL_RELIABLE;
@@ -69,6 +74,8 @@ private:
 	uint32_t reliabilityParameters = 0;
 	std::string label;
 	std::string subprotocol;
+	
+	std::list<std::shared_ptr<MessageListener>> messageListeners;
 };
 
 }; //namespace impl

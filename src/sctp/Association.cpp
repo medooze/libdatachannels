@@ -235,4 +235,19 @@ bool Association::SendData(uint16_t streamId, std::unique_ptr<sctp::Payload> dat
 	return result == EventResult::Success;
 }
 
+Stream::shared Association::createStream(uint16_t streamId)
+{
+	if (streams.find(streamId) == streams.end())
+	{
+		streams[streamId] = std::make_shared<Stream>(*this, streamId);
+		// OnStreamCreated
+		if (listener)
+		{
+			listener->OnStreamCreated(streams[streamId]);
+		}
+	}
+	
+	return streams[streamId];
+}
+
 }; //namespace sctp

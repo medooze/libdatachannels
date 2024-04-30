@@ -128,7 +128,7 @@ class MessageListener
 {
 public:
 	virtual ~MessageListener() = default;
-	virtual void OnMessage(const Message& message) = 0;
+	virtual void OnMessage(const std::shared_ptr<Message>& message) = 0;
 };
 
 class MessageProducer

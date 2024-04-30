@@ -27,7 +27,6 @@ using AssociationFsm = fsm::StateMachine<ClosedState, CookieWaitState, CookieEch
 class Association : public datachannels::Transport, public DataReceiver::Listener, public Transmitter
 {
 public:
-
 	class Listener
 	{
 	public:
@@ -92,6 +91,9 @@ public:
 	void OnDataReceived(uint16_t streamId, std::unique_ptr<sctp::Payload> data) override;
 	
 	bool SendData(uint16_t streamId, std::unique_ptr<sctp::Payload> data);
+	
+	Stream::shared createStream(uint16_t streamId);
+	
 private:
 
 	std::list<Chunk::shared> queue;
