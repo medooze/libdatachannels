@@ -30,6 +30,12 @@ struct PortsHash
 class Sctp : public datachannels::Sctp, public datachannels::Transport
 {
 public:
+	class Listener
+	{
+	public:
+		virtual ~Listener() = default;
+		virtual void OnDataChannelOpen(const std::string& endpointId, const std::shared_ptr<datachannels::DataChannel>& dataChannel) = 0;
+	};
 	
 	Sctp(TimeService& timeService, datachannels::OnTransmissionPendingListener& listener);
 
@@ -39,16 +45,23 @@ public:
 	inline Transport& GetTransport() override	{ return *this; }
 	bool Close() override;
 	
-	std::shared_ptr<Endpoint> AddEndpoint(const Endpoint::Options& options);
+	void CreateDataChannel(const std::string& label, const std::string& endpointIdentifier = "");
+	
+	void SetListener(const std::shared_ptr<Listener>& listener);
 	
 private:
+	std::shared_ptr<Endpoint> AddEndpoint(const Endpoint::Options& options);
 
 	Endpoint::Mode mode = Endpoint::Mode::Sever;
 	
 	TimeService& timeService;
-	std::unordered_map<Ports, std::shared_ptr<Endpoint>, PortsHash, PortsComp> endpoints;
+	std::unordered_map<Ports, std::shared_ptr<Endpoint>, PortsHash, PortsComp> allEndpoints;
+	
+	std::unordered_map<std::string, std::shared_ptr<Endpoint>> endpoints;
 	
 	datachannels::OnTransmissionPendingListener& listener;
+	
+	std::shared_ptr<Listener> dclistener;
 };
 
 }

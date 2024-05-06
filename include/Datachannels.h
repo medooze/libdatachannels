@@ -91,7 +91,7 @@ public:
 	// Read from the transport
 	virtual size_t ReadPacket(uint8_t *data, uint32_t size) = 0;
 	// Write to the transport
-	virtual size_t WritePacket(uint8_t *data, uint32_t size) = 0; 
+	virtual size_t WritePacket(uint8_t *data, uint32_t size) = 0;
 };
 
 class Endpoint

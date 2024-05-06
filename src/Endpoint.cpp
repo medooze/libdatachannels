@@ -21,7 +21,7 @@ Endpoint::~Endpoint()
 
 bool Endpoint::Init(const Options& options)
 {
-	factory = std::make_unique<DataChannelFactory>(association, mode);
+	factory = std::make_unique<DataChannelFactory>(association, options.mode);
 	
 	//Set ports on sctp
 	association.SetLocalPort(options.ports.localPort);

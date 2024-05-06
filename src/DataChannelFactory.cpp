@@ -17,6 +17,8 @@ std::shared_ptr<DataChannel> DataChannelFactory::CreateDataChannel()
 	
 	dataChannels[id] = channel;
 	
+	if (listener) listener->OnDataChannelAdded(channel);
+	
 	return channel;
 }
 
@@ -31,6 +33,8 @@ void DataChannelFactory::OnStreamCreated(const sctp::Stream::shared& stream)
 	
 	auto channel = std::make_shared<DataChannel>(stream);
 	dataChannels[stream->GetId()] = channel;
+	
+	if (listener) listener->OnDataChannelAdded(channel);
 }
 
 uint16_t DataChannelFactory::allocateStreamId()

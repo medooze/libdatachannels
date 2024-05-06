@@ -23,9 +23,14 @@ public:
 	virtual uint16_t GetLocalPort() const override;
 	virtual uint16_t GetRemotePort() const override;
 	virtual datachannels::Transport& GetTransport() override;
+	
+	inline void SetListener(DataChannelFactory::Listener* listener)
+	{
+		if (factory != nullptr) factory->SetListener(listener);
+	}
+	
 private:
 	sctp::Association association;
-	Endpoint::Mode mode = Endpoint::Mode::Sever;
 	
 	std::unique_ptr<DataChannelFactory> factory;
 };

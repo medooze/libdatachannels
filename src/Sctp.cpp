@@ -75,4 +75,9 @@ std::shared_ptr<Endpoint> Sctp::AddEndpoint(const Endpoint::Options& options)
 	return endpoint;
 }
 
+void Sctp::SetListener(const std::shared_ptr<Sctp::Listener>& listener)
+{
+	this->dclistener = listener;
+}
+
 }
