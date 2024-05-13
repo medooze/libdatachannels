@@ -25,14 +25,14 @@ public:
 	{
 	public:
 		virtual ~Listener() = default;
-		virtual void OnPayload(std::unique_ptr<sctp::Payload> payload) = 0;
+		virtual void OnPayload(std::shared_ptr<sctp::Payload> payload) = 0;
 	};
 
 	Stream(Association &association, uint16_t id);
 	virtual ~Stream();
 	
-	bool Recv(std::unique_ptr<sctp::Payload> payload);
-	bool Send(std::unique_ptr<sctp::Payload> payload);
+	bool Recv(std::shared_ptr<sctp::Payload> payload);
+	bool Send(std::shared_ptr<sctp::Payload> payload);
 	
 	uint16_t GetId() const { return id; }
 	

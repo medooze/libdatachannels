@@ -14,7 +14,7 @@ Stream::~Stream()
 {
 }
 
-bool Stream::Recv(std::unique_ptr<sctp::Payload> payload)
+bool Stream::Recv(std::shared_ptr<sctp::Payload> payload)
 {
 	if (listener)
 	{
@@ -24,7 +24,7 @@ bool Stream::Recv(std::unique_ptr<sctp::Payload> payload)
 	return true;
 }
 
-bool Stream::Send(std::unique_ptr<sctp::Payload> payload)
+bool Stream::Send(std::shared_ptr<sctp::Payload> payload)
 {
 	return association.SendData(id, std::move(payload));
 }

@@ -23,51 +23,45 @@ DataSender::~DataSender()
 
 bool DataSender::Send(uint16_t streamId, std::shared_ptr<sctp::Payload> data)
 {
-	std::weak_ptr<DataSender> weak = shared_from_this();
-	timeService.Async([weak, streamId, data](std::chrono::milliseconds) {
-		auto self = weak.lock();
-		if (!self) return;
+	// Give space for new data if pool is full
+	if (payloadDataChunks.size() > PayloadPoolSize)
+	{
+		payloadDataChunks.erase(payloadDataChunks.begin());
+	}
+	
+	auto chunk = std::make_shared<PayloadDataChunk>();
+	chunk->transmissionSequenceNumber = unackedTsns.empty() ? 
+		(cumulativeTsnAckPoint + 1) : *(--unackedTsns.end()) + 1;
 		
-		// Give space for new data if pool is full
-		if (self->payloadDataChunks.size() > PayloadPoolSize)
-		{
-			self->payloadDataChunks.erase(self->payloadDataChunks.begin());
-		}
+	chunk->streamIdentifier = streamId;
+	chunk->payloadProtocolIdentifier = uint32_t(data->type);
+	chunk->userData = std::move(data->data);
+	// We are not supporting fragmentation yet. Set it as a sole complete chunk.
+	chunk->beginingFragment = true;
+	chunk->endingFragment = true;
+	
+	if (streamSequenceNumbers.find(streamId) == streamSequenceNumbers.end())
+	{
+		streamSequenceNumbers[streamId] = 0;
+	}
+	else
+	{
+		streamSequenceNumbers[streamId] = streamSequenceNumbers[streamId] + 1;
+	}
+	
+	chunk->streamSequenceNumber = streamSequenceNumbers[streamId];
+	
+	auto wrapped = tsnWrapper.Wrap(chunk->transmissionSequenceNumber);
+	payloadDataChunks[wrapped] = chunk;
+	unackedTsns.insert(wrapped);
+	
+	if (chunk->transmissionSequenceNumber == cumulativeTsnAckPoint + 1)
+	{
+		transmitter.Enqueue(chunk);
+		Debug("Enqueued payload %d\n", chunk->userData.GetSize());
 		
-		auto chunk = std::make_shared<PayloadDataChunk>();
-		chunk->transmissionSequenceNumber = self->unackedTsns.empty() ? 
-			(self->cumulativeTsnAckPoint + 1) : *(--self->unackedTsns.end()) + 1;
-			
-		chunk->streamIdentifier = streamId;
-		chunk->payloadProtocolIdentifier = uint32_t(data->type);
-		chunk->userData = std::move(data->data);
-		// We are not supporting fragmentation yet. Set it as a sole complete chunk.
-		chunk->beginingFragment = true;
-		chunk->endingFragment = true;
-		
-		if (self->streamSequenceNumbers.find(streamId) == self->streamSequenceNumbers.end())
-		{
-			self->streamSequenceNumbers[streamId] = 0;
-		}
-		else
-		{
-			self->streamSequenceNumbers[streamId] = self->streamSequenceNumbers[streamId] + 1;
-		}
-		
-		chunk->streamSequenceNumber = self->streamSequenceNumbers[streamId];
-		
-		auto wrapped = self->tsnWrapper.Wrap(chunk->transmissionSequenceNumber);
-		self->payloadDataChunks[wrapped] = chunk;
-		self->unackedTsns.insert(wrapped);
-		
-		if (chunk->transmissionSequenceNumber == self->cumulativeTsnAckPoint + 1)
-		{
-			self->transmitter.Enqueue(chunk);
-			Debug("Enqueued payload %d\n", chunk->userData.GetSize());
-			
-			self->startRtxTimer();
-		}
-	});
+		startRtxTimer();
+	}
 	
 	// @todo check if receiver is OK to receive.
 	return true;
@@ -102,7 +96,6 @@ void DataSender::checkRetransmission()
 		
 		startRtxTimer();
 	}
-	
 }
 	
 void DataSender::HandleSackChunk(std::shared_ptr<SelectiveAcknowledgementChunk> chunk)

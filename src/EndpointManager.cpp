@@ -20,7 +20,6 @@ void EndpointManager::SetEndpointMode(Endpoint::Mode mode)
 	this->mode = mode;
 }
 
-
 void EndpointManager::CreateDataChannel(const std::string& label, const std::string& endpointIdentifier)
 {
 	if (establishedEndpoints.find(endpointIdentifier) != establishedEndpoints.end())

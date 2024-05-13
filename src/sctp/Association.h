@@ -101,9 +101,9 @@ public:
 	
 	// Upper level interfaces
 	
-	void OnDataReceived(uint16_t streamId, std::unique_ptr<sctp::Payload> data) override;
+	void OnDataReceived(uint16_t streamId, std::shared_ptr<sctp::Payload> data) override;
 	
-	bool SendData(uint16_t streamId, std::unique_ptr<sctp::Payload> data);
+	bool SendData(uint16_t streamId, std::shared_ptr<sctp::Payload> data);
 	
 	Stream::shared createStream(uint16_t streamId);
 	

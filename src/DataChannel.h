@@ -51,19 +51,17 @@ public:
 	virtual bool Close() override;
 	
 	// sctp::Stream::Listener
-	virtual void OnPayload(std::unique_ptr<sctp::Payload> payload) override;
+	virtual void OnPayload(std::shared_ptr<sctp::Payload> payload) override;
 	
 	// Listener
 	virtual void OnMessage(const std::shared_ptr<Message>& message) override;
+	
 	virtual void AddMessageListener(const std::shared_ptr<MessageListener>& listener) override;
 	virtual void RemoveMessageListener(const std::shared_ptr<MessageListener>& listener) override;
 	
 	void Open();
 	
-	inline void SetListener(Listener* listener)
-	{
-		listener = listener;
-	}
+	void SetListener(Listener* listener);
 private:
 	enum class State
 	{

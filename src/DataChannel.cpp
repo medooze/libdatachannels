@@ -30,9 +30,7 @@ DataChannel::~DataChannel()
 	
 bool DataChannel::Send(datachannels::MessageType type, const uint8_t* data, const uint64_t size)
 {
-	if (state != State::Established) return false;
-	
-	auto payload = std::make_unique<sctp::Payload>();
+	auto payload = std::make_shared<sctp::Payload>();
 	
 	if (!data || !size)
 	{
@@ -50,7 +48,25 @@ bool DataChannel::Send(datachannels::MessageType type, const uint8_t* data, cons
 		payload->data = Buffer(data, size);
 	}
 	
-	return stream->Send(std::move(payload));
+	std::weak_ptr<DataChannel> weak = shared_from_this();
+	timeService.Async([weak, payload](...) {
+		auto self = weak.lock();
+		if (!self) return;
+		
+		if (self->state != State::Established)
+		{
+			Error("Data channel is not established. Skip sending.\n");
+			return;
+		}
+
+		if (!self->stream->Send(payload))
+		{
+			Error("Faild to send stream data. Skip sending.\n");
+			return;
+		}
+	});
+	
+	return true;
 }
 
 bool DataChannel::Close()
@@ -71,7 +87,7 @@ bool DataChannel::Close()
 	return true;
 }
 
-void DataChannel::OnPayload(std::unique_ptr<sctp::Payload> payload)
+void DataChannel::OnPayload(std::shared_ptr<sctp::Payload> payload)
 {
 	Debug("DataChannel::OnPayload\n");
 		
@@ -83,7 +99,7 @@ void DataChannel::OnPayload(std::unique_ptr<sctp::Payload> payload)
 		{
 			if (ParseOpenMessage(reader))
 			{
-				std::unique_ptr<sctp::Payload> ack = std::make_unique<sctp::Payload>();
+				std::shared_ptr<sctp::Payload> ack = std::make_unique<sctp::Payload>();
 				ack->type = sctp::PayloadType::DCEP;
 				
 				uint8_t ackType = DATA_CHANNEL_ACK;
@@ -139,6 +155,40 @@ void DataChannel::Open()
 	// @todo DCEP
 }
 
+void DataChannel::OnMessage(const std::shared_ptr<datachannels::Message>& message)
+{
+	(void)Send(message->GetInfo().type, message->GetData(), message->GetLength());
+}
+
+void DataChannel::AddMessageListener(const std::shared_ptr<MessageListener>& listener)
+{
+	std::weak_ptr<DataChannel> weak = shared_from_this();
+	timeService.Async([weak, listener](...){
+		auto self = weak.lock();
+		if (!self) return;
+		
+		self->messageListeners.push_back(listener);
+	});
+}
+
+void DataChannel::RemoveMessageListener(const std::shared_ptr<MessageListener>& listener)
+{
+	std::weak_ptr<DataChannel> weak = shared_from_this();
+	timeService.Async([weak, listener](...){
+		auto self = weak.lock();
+		if (!self) return;
+		
+		self->messageListeners.remove(listener);
+	});
+}
+
+void DataChannel::SetListener(Listener* listener)
+{
+	timeService.Sync([this, listener](...) {
+		this->listener = listener;	
+	});
+}
+
 bool DataChannel::ParseOpenMessage(BufferReader& reader)
 {
 	if (reader.GetSize() < 1)
@@ -184,39 +234,6 @@ bool DataChannel::ParseOpenMessage(BufferReader& reader)
 	return true;
 }
 
-void DataChannel::OnMessage(const std::shared_ptr<datachannels::Message>& message)
-{
-	std::weak_ptr<DataChannel> weak = shared_from_this();
-	timeService.Async([weak, message](...){
-		auto self = weak.lock();
-		if (!self) return;
-		
-		self->Send(message->GetInfo().type, message->GetData(), message->GetLength());
-	});
-}
-
-void DataChannel::AddMessageListener(const std::shared_ptr<MessageListener>& listener)
-{
-	std::weak_ptr<DataChannel> weak = shared_from_this();
-	timeService.Async([weak, listener](...){
-		auto self = weak.lock();
-		if (!self) return;
-		
-		self->messageListeners.push_back(listener);
-	});
-}
-
-void DataChannel::RemoveMessageListener(const std::shared_ptr<MessageListener>& listener)
-{
-	std::weak_ptr<DataChannel> weak = shared_from_this();
-	timeService.Async([weak, listener](...){
-		auto self = weak.lock();
-		if (!self) return;
-		
-		self->messageListeners.remove(listener);
-	});
-}
-	
 void DataChannel::Dump() const
 {
 	Debug("Data channel Info:\n");
@@ -226,6 +243,5 @@ void DataChannel::Dump() const
 	Debug("label: %s\n", label.c_str());
 	Debug("subprotocol: %s\n", subprotocol.c_str());
 }
-
 }; //namespace impl
 }; //namespace datachannel
