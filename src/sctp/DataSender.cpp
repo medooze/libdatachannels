@@ -21,7 +21,7 @@ DataSender::~DataSender()
 	}
 }
 
-bool DataSender::Send(uint16_t streamId, std::shared_ptr<sctp::Payload> data)
+bool DataSender::Send(uint16_t streamId, std::shared_ptr<datachannels::Message> data)
 {
 	// Give space for new data if pool is full
 	if (payloadDataChunks.size() > PayloadPoolSize)
@@ -35,7 +35,7 @@ bool DataSender::Send(uint16_t streamId, std::shared_ptr<sctp::Payload> data)
 		
 	chunk->streamIdentifier = streamId;
 	chunk->payloadProtocolIdentifier = uint32_t(data->type);
-	chunk->userData = std::move(data->data);
+	chunk->userData = Buffer(data->data.data(), data->data.size());
 	// We are not supporting fragmentation yet. Set it as a sole complete chunk.
 	chunk->beginingFragment = true;
 	chunk->endingFragment = true;

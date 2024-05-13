@@ -4,7 +4,7 @@
 #include "Message.h"
 
 #include "sctp/Stream.h"
-#include "sctp/Payload.h"
+#include "Message.h"
 
 #include <memory>
 
@@ -51,7 +51,7 @@ public:
 	virtual bool Close() override;
 	
 	// sctp::Stream::Listener
-	virtual void OnPayload(std::shared_ptr<sctp::Payload> payload) override;
+	virtual void OnPayload(std::shared_ptr<datachannels::Message> payload) override;
 	
 	// Listener
 	virtual void OnMessage(const std::shared_ptr<Message>& message) override;

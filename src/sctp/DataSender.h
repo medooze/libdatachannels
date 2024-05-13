@@ -4,7 +4,7 @@
 #include "SequenceNumberWrapper.h"
 #include "Chunk.h"
 #include "Datachannels.h"
-#include "sctp/Payload.h"
+#include "Message.h"
 #include "Transmitter.h"
 
 #include <stdint.h>
@@ -82,7 +82,7 @@ public:
 	DataSender(datachannels::TimeService& timeService, Transmitter& transmitter, uint32_t localInitialTsn, uint32_t remoteAdvertisedReceiverWindowCredit);
 	~DataSender();
 	
-	bool Send(uint16_t streamId, std::shared_ptr<sctp::Payload> data);
+	bool Send(uint16_t streamId, std::shared_ptr<datachannels::Message> data);
 	
 	void HandleSackChunk(std::shared_ptr<SelectiveAcknowledgementChunk> chunk);
 	

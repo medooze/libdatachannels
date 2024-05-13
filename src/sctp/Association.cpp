@@ -204,7 +204,7 @@ void Association::Enqueue(const std::vector<Chunk::shared>& chunkBundle)
 		dataPendingListener.OnTransportDataPending();
 }
 
-void Association::OnDataReceived(uint16_t streamId, std::shared_ptr<sctp::Payload> data)
+void Association::OnDataReceived(uint16_t streamId, std::shared_ptr<datachannels::Message> data)
 {
 	if (streams.find(streamId) == streams.end())
 	{
@@ -216,14 +216,14 @@ void Association::OnDataReceived(uint16_t streamId, std::shared_ptr<sctp::Payloa
 		}
 	}
 	
-	streams[streamId]->Recv(std::move(data));
+	streams[streamId]->Recv(data);
 }
 
-bool Association::SendData(uint16_t streamId, std::shared_ptr<sctp::Payload> data)
+bool Association::SendData(uint16_t streamId, std::shared_ptr<datachannels::Message> data)
 {
 	SendEvent event;
 	event.streamId = streamId;
-	event.payload = std::move(data);
+	event.payload = data;
 	
 	EventResult result = EventResult::Unprocessed;
 	event.callback = [&result](EventResult res){

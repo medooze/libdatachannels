@@ -30,41 +30,12 @@ DataChannel::~DataChannel()
 	
 bool DataChannel::Send(datachannels::MessageType type, const uint8_t* data, const uint64_t size)
 {
-	auto payload = std::make_shared<sctp::Payload>();
+	auto payload = std::make_shared<datachannels::Message>();
 	
-	if (!data || !size)
-	{
-		//   SCTP does not support the sending of empty user messages.  Therefore,
-		//   if an empty message has to be sent, the appropriate PPID (WebRTC
-		//   String Empty or WebRTC Binary Empty) is used and the SCTP user
-		//   message of one zero byte is sent.  When receiving an SCTP user
-		//   message with one of these PPIDs, the receiver MUST ignore the SCTP
-		//   user message and process it as an empty message.
-		payload->type = type==datachannels::MessageType::UTF8 ? sctp::PayloadType::WebRTCStringEmpty : sctp::PayloadType::WebRTCBinaryEmpty;
-	}
-	else 
-	{
-		payload->type = type==datachannels::MessageType::UTF8 ? sctp::PayloadType::WebRTCString : sctp::PayloadType::WebRTCBinary;
-		payload->data = Buffer(data, size);
-	}
+	payload->type = type;
+	payload->data.assign(data, data + size);
 	
-	std::weak_ptr<DataChannel> weak = shared_from_this();
-	timeService.Async([weak, payload](...) {
-		auto self = weak.lock();
-		if (!self) return;
-		
-		if (self->state != State::Established)
-		{
-			Error("Data channel is not established. Skip sending.\n");
-			return;
-		}
-
-		if (!self->stream->Send(payload))
-		{
-			Error("Faild to send stream data. Skip sending.\n");
-			return;
-		}
-	});
+	OnMessage(payload);
 	
 	return true;
 }
@@ -87,27 +58,28 @@ bool DataChannel::Close()
 	return true;
 }
 
-void DataChannel::OnPayload(std::shared_ptr<sctp::Payload> payload)
+void DataChannel::OnPayload(std::shared_ptr<datachannels::Message> payload)
 {
 	Debug("DataChannel::OnPayload\n");
 		
-	BufferReader reader(payload->data);
+	BufferReader reader(payload->data.data(), payload->data.size());
 	
 	if (state == State::Unestablished)
 	{
-		if (payload->type == sctp::PayloadType::DCEP)
+		if (payload->type == datachannels::MessageType::DCEP)
 		{
 			if (ParseOpenMessage(reader))
 			{
-				std::shared_ptr<sctp::Payload> ack = std::make_unique<sctp::Payload>();
-				ack->type = sctp::PayloadType::DCEP;
+				std::shared_ptr<datachannels::Message> ack = std::make_unique<datachannels::Message>();
+				ack->type = datachannels::MessageType::DCEP;
 				
 				uint8_t ackType = DATA_CHANNEL_ACK;
-				ack->data = Buffer(&ackType, 1);
+				ack->data.resize(1);
+				ack->data[0] = ackType;
 				
 				Dump();
 				
-				stream->Send(std::move(ack));
+				stream->Send(ack);
 				
 				state = State::Established;
 				
@@ -121,27 +93,9 @@ void DataChannel::OnPayload(std::shared_ptr<sctp::Payload> payload)
 	}
 	else if (state == State::Established)
 	{
-		auto type = datachannels::MessageType::UTF8;
-		
-		switch (payload->type)
-		{
-		case sctp::PayloadType::WebRTCString:
-		case sctp::PayloadType::WebRTCStringEmpty:
-			type = datachannels::MessageType::UTF8;
-			break;
-		case sctp::PayloadType::WebRTCBinary:
-		case sctp::PayloadType::WebRTCBinaryEmpty:
-			type = datachannels::MessageType::UTF8;
-			break;
-		default:
-			Debug("Unexpected payload type: %d\n", type);
-			return;
-		}
-		
-		auto message = std::make_shared<datachannels::Message>(type, stream->getAssociation().GetLocalPort(), stream->GetId());
 		for (auto& listener : messageListeners)
 		{
-			listener->OnMessage(message);
+			listener->OnMessage(payload);
 		}
 	}
 	else
@@ -155,9 +109,25 @@ void DataChannel::Open()
 	// @todo DCEP
 }
 
-void DataChannel::OnMessage(const std::shared_ptr<datachannels::Message>& message)
+void DataChannel::OnMessage(const std::shared_ptr<datachannels::Message>& payload)
 {
-	(void)Send(message->GetInfo().type, message->GetData(), message->GetLength());
+	std::weak_ptr<DataChannel> weak = shared_from_this();
+	timeService.Async([weak, payload](...) {
+		auto self = weak.lock();
+		if (!self) return;
+		
+		if (self->state != State::Established)
+		{
+			Error("Data channel is not established. Skip sending.\n");
+			return;
+		}
+
+		if (!self->stream->Send(payload))
+		{
+			Error("Faild to send stream data. Skip sending.\n");
+			return;
+		}
+	});
 }
 
 void DataChannel::AddMessageListener(const std::shared_ptr<MessageListener>& listener)

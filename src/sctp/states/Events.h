@@ -1,7 +1,7 @@
 #ifndef EVENTS_H
 #define EVENTS_H
 
-#include "sctp/Payload.h"
+#include "Message.h"
 
 #include <memory>
 #include <functional>
@@ -49,7 +49,7 @@ struct TimeoutEvent : public Event
 struct SendEvent : public Event
 {
 	uint16_t streamId;
-	std::shared_ptr<sctp::Payload> payload;
+	std::shared_ptr<datachannels::Message> payload;
 };
 
 };

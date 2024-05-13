@@ -192,10 +192,10 @@ std::shared_ptr<SelectiveAcknowledgementChunk> DataReceiver::generateSackChunk()
 			// Notify data received
 			auto data = payloadDataChunks[current];
 			
-			auto payload = std::make_unique<sctp::Payload>();
+			auto payload = std::make_unique<datachannels::Message>();
 
-			payload->data = std::move(data->userData);
-			payload->type = sctp::PayloadType(data->payloadProtocolIdentifier);
+			payload->data.assign(data->userData.GetData(), data->userData.GetData() + data->userData.GetSize());
+			payload->type = datachannels::MessageType(data->payloadProtocolIdentifier);
 			
 			listener.OnDataReceived(data->streamIdentifier, std::move(payload));
 			

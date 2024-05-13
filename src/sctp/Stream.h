@@ -7,7 +7,7 @@
 #include <memory>
 
 #include "Buffer.h"
-#include "Payload.h"
+#include "Message.h"
 #include <memory>
 
 
@@ -25,14 +25,14 @@ public:
 	{
 	public:
 		virtual ~Listener() = default;
-		virtual void OnPayload(std::shared_ptr<sctp::Payload> payload) = 0;
+		virtual void OnPayload(std::shared_ptr<datachannels::Message> payload) = 0;
 	};
 
 	Stream(Association &association, uint16_t id);
 	virtual ~Stream();
 	
-	bool Recv(std::shared_ptr<sctp::Payload> payload);
-	bool Send(std::shared_ptr<sctp::Payload> payload);
+	bool Recv(std::shared_ptr<datachannels::Message> payload);
+	bool Send(std::shared_ptr<datachannels::Message> payload);
 	
 	uint16_t GetId() const { return id; }
 	
