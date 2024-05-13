@@ -7,7 +7,7 @@ namespace datachannels
 namespace impl
 {
 
-Endpoint::Endpoint(datachannels::TimeService& timeService, datachannels::OnTransmissionPendingListener& listener) :
+Endpoint::Endpoint(datachannels::TimeService& timeService, datachannels::OnTransportDataPendingListener& listener) :
 	association(timeService, listener)
 {
 	
@@ -17,30 +17,40 @@ Endpoint::~Endpoint()
 {
 	//Terminate association now!
 	association.Abort();
+	
+	for (auto& [id, channel] : dataChannels)
+	{
+		channel->SetListener(nullptr);
+	}
 }
 
 bool Endpoint::Init(const Options& options)
 {
-	factory = std::make_unique<DataChannelFactory>(association, options.mode);
+	mode = options.mode;
 	
 	//Set ports on sctp
 	association.SetLocalPort(options.ports.localPort);
 	association.SetRemotePort(options.ports.remotePort);
 	
-	//If we are clients
-	if (options.mode == Mode::Client)
-		//Start association
-		return association.Associate();
-	
 	//OK, wait for client to associate
 	return true;
 }
 
+void Endpoint::Connect()
+{
+	association.Associate();
+}
+
 DataChannel::shared Endpoint::CreateDataChannel(const DataChannel::Options& options)
 {
-	if (!factory) return nullptr;
+	auto id = allocateStreamId();
+	auto channel = std::make_shared<DataChannel>(association, id);
 	
-	return factory->CreateDataChannel();
+	dataChannels[id] = channel;
+	
+	if (listener != nullptr) listener->OnDataChannelCreated(channel);
+	
+	return channel;
 }
 
 bool Endpoint::Close()
@@ -64,6 +74,53 @@ datachannels::Transport& Endpoint::GetTransport()
 {
 	return association;
 }
+
+const std::map<uint16_t, std::shared_ptr<DataChannel>>& Endpoint::GetDataChannels() const
+{
+	return dataChannels;
+}
+
+void Endpoint::OnStreamCreated(const sctp::Stream::shared& stream)
+{
+	Debug("DataChannelFactory::OnStreamCreated: %d\n", stream->GetId());
+	
+	auto channel = std::make_shared<DataChannel>(stream);
+	dataChannels[stream->GetId()] = channel;
+	
+	if (listener != nullptr) listener->OnDataChannelCreated(channel);
+}
+
+void Endpoint::OnEstablished(sctp::Association* association)
+{
+	if (listener != nullptr) listener->OnAssociationEstablished(shared_from_this());
+}
+
+void Endpoint::OnClosed(sctp::Association* association)
+{
+	if (listener != nullptr) listener->OnAssociationClosed(shared_from_this());
+}
+
+uint16_t Endpoint::allocateStreamId()
+{
+	auto maxStreamId = 0;
+	if (!dataChannels.empty())
+	{
+		maxStreamId = (--dataChannels.end())->first;
+	}
+	
+	auto isEven = maxStreamId % 2 == 0;
+	if (mode == Endpoint::Mode::Server)
+	{
+		// Server mode uses odd number
+		return isEven ? (maxStreamId + 1) : (maxStreamId + 2);
+	}
+	else
+	{
+		// Client mode uses even number
+		return isEven ? (maxStreamId + 2) : (maxStreamId + 1);
+	}
+}
+
 	
 }; // namespace impl
 }; // namespace datachannel

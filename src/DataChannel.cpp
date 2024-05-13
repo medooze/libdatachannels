@@ -21,10 +21,7 @@ DataChannel::DataChannel(sctp::Association& association, uint16_t id) :
 	this->stream = association.createStream(id);
 	
 	stream->SetListener(this);
-	
-	Open();
 }
-
 
 DataChannel::~DataChannel()
 {
@@ -97,6 +94,8 @@ void DataChannel::OnPayload(std::unique_ptr<sctp::Payload> payload)
 				stream->Send(std::move(ack));
 				
 				state = State::Established;
+				
+				if (listener != nullptr) listener->OnOpen(shared_from_this());
 			}
 			else
 			{

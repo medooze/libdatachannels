@@ -1,18 +1,31 @@
 #ifndef DATACHANNEL_IMPL_ENDPOINT_H_
 #define DATACHANNEL_IMPL_ENDPOINT_H_
 #include "Datachannels.h"
+#include "DataChannel.h"
 #include "sctp/Association.h"
-#include "DataChannelFactory.h"
 
 namespace datachannels
 {
 namespace impl
 {
 
-class Endpoint : public datachannels::Endpoint
+class Endpoint : public datachannels::Endpoint,
+		public sctp::Association::Listener,
+		public std::enable_shared_from_this<Endpoint>
 {
 public:
-	Endpoint(TimeService& timeService, datachannels::OnTransmissionPendingListener& listener);
+	using shared = std::shared_ptr<Endpoint>;
+	
+	class Listener
+	{
+	public:
+		virtual void OnAssociationEstablished(const Endpoint::shared& endpoint) = 0;
+		virtual void OnAssociationClosed(const Endpoint::shared& endpoint) = 0;
+		
+		virtual void OnDataChannelCreated(const datachannels::DataChannel::shared& dataChannel) = 0;
+	};
+
+	Endpoint(TimeService& timeService, datachannels::OnTransportDataPendingListener& listener);
 	virtual ~Endpoint();
 	
 	virtual bool Init(const Options& options)  override;
@@ -24,15 +37,35 @@ public:
 	virtual uint16_t GetRemotePort() const override;
 	virtual datachannels::Transport& GetTransport() override;
 	
-	inline void SetListener(DataChannelFactory::Listener* listener)
+	void Connect();
+	
+	const std::map<uint16_t, std::shared_ptr<DataChannel>> & GetDataChannels() const;
+
+	// sctp::Association::Listener overrides
+	void OnStreamCreated(const sctp::Stream::shared& stream) override;
+	void OnEstablished(sctp::Association* association) override;
+	void OnClosed(sctp::Association* association) override;
+	
+	inline void SetListener(Listener* listener)
 	{
-		if (factory != nullptr) factory->SetListener(listener);
+		this->listener = listener;
+	}
+	
+	inline std::string GetIdentifier() const
+	{
+		return identifier;
 	}
 	
 private:
-	sctp::Association association;
+	uint16_t allocateStreamId();
 	
-	std::unique_ptr<DataChannelFactory> factory;
+	datachannels::Endpoint::Mode mode;
+	sctp::Association association;
+	std::string identifier;
+	
+	std::map<uint16_t, std::shared_ptr<DataChannel>> dataChannels;
+	
+	Listener* listener;
 };
 
 }; //namespace impl

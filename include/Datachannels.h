@@ -60,7 +60,7 @@ public:
 
 	struct Options
 	{
-		
+		std::string label;
 	};
 
 	using shared = std::shared_ptr<DataChannel>;
@@ -70,18 +70,18 @@ public:
 	virtual bool Close() = 0;
 };
 
-class OnTransmissionPendingListener
+class OnTransportDataPendingListener
 {
 public:
-	virtual ~OnTransmissionPendingListener() = default;
-	virtual void OnTransmissionPending() = 0;
+	virtual ~OnTransportDataPendingListener() = default;
+	virtual void OnTransportDataPending() = 0;
 };
 
-class OnDatachannelCreatedListener
+class OnDataChannelCreatedListener
 {
 public:
-	virtual ~OnDatachannelCreatedListener() = default;
-	virtual void OnDatachannelCreated(const std::shared_ptr<DataChannel>& datachannel) = 0;
+	virtual ~OnDataChannelCreatedListener() = default;
+	virtual void OnDataChannelCreated(const datachannels::DataChannel::shared& dataChannel) = 0;
 };
 
 class Transport
@@ -99,14 +99,14 @@ class Endpoint
 public:
 	enum class Mode
 	{
-		Sever,
+		Server,
 		Client
 	};
 	
 	struct Options
 	{
 		Ports ports;
-		Mode mode = Mode::Sever;
+		Mode mode = Mode::Server;
 	};
 	
 	using shared = std::shared_ptr<Endpoint>;
@@ -121,15 +121,6 @@ public:
 	virtual uint16_t   GetLocalPort() const = 0;
 	virtual uint16_t   GetRemotePort() const = 0;
 	virtual Transport& GetTransport() = 0;
-};
-
-class Sctp
-{
-public:
-	using shared = std::shared_ptr<Sctp>;
-	
-	virtual Transport& GetTransport() = 0;
-	virtual bool Close() = 0;
 };
 
 }; //namespace

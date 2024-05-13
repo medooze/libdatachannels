@@ -33,7 +33,15 @@ public:
 		DATA_CHANNEL_PARTIAL_RELIABLE_TIMED 		= 0x02,
 		DATA_CHANNEL_PARTIAL_RELIABLE_TIMED_UNORDERED	= 0x82
 	};
-
+	
+	class Listener
+	{
+	public:
+		virtual ~Listener() = default;
+		virtual void OnOpen(const datachannels::DataChannel::shared& dataChannel) = 0;
+		virtual void OnClosed(const datachannels::DataChannel::shared& dataChannel) = 0;
+	};
+	
 	DataChannel(const sctp::Stream::shared& stream);
 	DataChannel(sctp::Association& association, uint16_t id);
 	
@@ -50,6 +58,12 @@ public:
 	virtual void AddMessageListener(const std::shared_ptr<MessageListener>& listener) override;
 	virtual void RemoveMessageListener(const std::shared_ptr<MessageListener>& listener) override;
 	
+	void Open();
+	
+	inline void SetListener(Listener* listener)
+	{
+		listener = listener;
+	}
 private:
 	enum class State
 	{
@@ -57,7 +71,6 @@ private:
 		Established	
 	};
 	
-	void Open();
 	
 	bool ParseOpenMessage(BufferReader& reader);
 	
@@ -66,6 +79,8 @@ private:
 	State state = State::Unestablished;
 
 	sctp::Stream::shared stream;
+	Listener* listener = nullptr;
+	
 	datachannels::TimeService& timeService;
 	
 	// Channel parameters

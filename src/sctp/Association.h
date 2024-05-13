@@ -31,9 +31,12 @@ public:
 	{
 	public:
 		virtual void OnStreamCreated(const sctp::Stream::shared& stream) = 0;
+
+		virtual void OnEstablished(Association* association) = 0;
+		virtual void OnClosed(Association* association) = 0;
 	};
 
-	Association(datachannels::TimeService& timeService, datachannels::OnTransmissionPendingListener& listener);
+	Association(datachannels::TimeService& timeService, datachannels::OnTransportDataPendingListener& dataPendingListener);
 	virtual ~Association();
 	
 	bool Associate();
@@ -48,6 +51,16 @@ public:
 	
 	void SetLocalVerificationTag(uint32_t tag) { localVerificationTag = tag; }
 	void SetRemoteVerificationTag(uint32_t tag) { remoteVerificationTag = tag; }
+	
+	void NotifyEstablished()
+	{
+		if (this->listener != nullptr) this->listener->OnEstablished(this);
+	}
+	
+	void NotifyClosed()
+	{
+		if (this->listener != nullptr) this->listener->OnClosed(this);
+	}
 	
 	inline void SetListener(Listener* listener)
 	{
@@ -108,7 +121,7 @@ private:
 
 	std::map<uint16_t,Stream::shared> streams;
 	
-	datachannels::OnTransmissionPendingListener& dataPendingListener;
+	datachannels::OnTransportDataPendingListener& dataPendingListener;
 	
 	Listener* listener = nullptr;
 	

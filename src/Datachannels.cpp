@@ -1,7 +1,7 @@
 // Unity jumbo build file
 #include "DataChannel.cpp"
 #include "Endpoint.cpp"
-#include "Sctp.cpp"
+#include "EndpointManager.cpp"
 #include "sctp/Association.cpp"
 #include "sctp/PacketHeader.cpp"
 #include "sctp/Stream.cpp"
@@ -29,4 +29,3 @@
 #include "sctp/states/EstablishedState.cpp"
 #include "sctp/DataReceiver.cpp"
 #include "sctp/DataSender.cpp"
-#include "DataChannelFactory.cpp"

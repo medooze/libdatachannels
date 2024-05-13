@@ -26,6 +26,8 @@ void ClosedState::onEnter(const Event& event)
 	
 	localInitialTsn = 1000;   // @todo Use a random number
 	association.SetLocalVerificationTag(0);
+	
+	association.NotifyClosed();
 }
 
 template<typename Event>

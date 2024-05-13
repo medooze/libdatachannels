@@ -23,6 +23,8 @@ void EstablishedState::onEnter(const Event& event, const std::tuple<uint32_t, ui
 	
 	dataReceiver = std::make_shared<DataReceiver>(association.GetTimeService(), association, remoteInitialTsn, localAdvertisedReceiverWindowCredit, association);
 	dataSender = std::make_shared<DataSender>(association.GetTimeService(), association, localInitialTsn, remoteAdveritsedReceiverWindowCredit);
+	
+	association.NotifyEstablished();
 }
 
 template <typename Event>

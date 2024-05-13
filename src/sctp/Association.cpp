@@ -14,9 +14,9 @@ std::random_device rd;
 std::mt19937 gen{rd()};
 std::uniform_int_distribution<unsigned long> dis{1, 4294967295};
 
-Association::Association(datachannels::TimeService& timeService, datachannels::OnTransmissionPendingListener &listener) :
+Association::Association(datachannels::TimeService& timeService, datachannels::OnTransportDataPendingListener &dataPendingListener) :
 	timeService(timeService),
-	dataPendingListener(listener),
+	dataPendingListener(dataPendingListener),
 	closedState(*this),
 	cookieWaitState(*this),
 	cookieEchoedState(*this),
@@ -187,7 +187,7 @@ void Association::Enqueue(const Chunk::shared& chunk)
 	pendingData = true;
 	//If it is first
 	if (!wasPending)
-		dataPendingListener.OnTransmissionPending();
+		dataPendingListener.OnTransportDataPending();
 }
 
 void Association::Enqueue(const std::vector<Chunk::shared>& chunkBundle)
@@ -201,7 +201,7 @@ void Association::Enqueue(const std::vector<Chunk::shared>& chunkBundle)
 	pendingData = true;
 	//If it is first
 	if (!wasPending)
-		dataPendingListener.OnTransmissionPending();
+		dataPendingListener.OnTransportDataPending();
 }
 
 void Association::OnDataReceived(uint16_t streamId, std::unique_ptr<sctp::Payload> data)
