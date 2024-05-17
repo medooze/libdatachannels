@@ -58,6 +58,11 @@ bool DataChannel::Close()
 	return true;
 }
 
+std::string DataChannel::GetLabel() const
+{
+	return label;
+}
+
 void DataChannel::OnPayload(std::shared_ptr<datachannels::Message> payload)
 {
 	Debug("DataChannel::OnPayload\n");
@@ -83,7 +88,7 @@ void DataChannel::OnPayload(std::shared_ptr<datachannels::Message> payload)
 				
 				state = State::Established;
 				
-				if (listener != nullptr) listener->OnOpen(shared_from_this());
+				if (listener) listener->OnOpen(shared_from_this());
 			}
 			else
 			{
@@ -160,7 +165,7 @@ void DataChannel::RemoveMessageListener(const std::shared_ptr<MessageListener>& 
 	});
 }
 
-void DataChannel::SetListener(Listener* listener)
+void DataChannel::SetListener(const std::shared_ptr<datachannels::DataChannel::Listener> & listener)
 {
 	timeService.Sync([this, listener](...) {
 		this->listener = listener;	

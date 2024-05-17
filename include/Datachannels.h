@@ -55,20 +55,31 @@ struct Ports
 	uint16_t remotePort = 5000;
 };
 
-class DataChannel
+class DataChannel : public MessageProducer, public MessageListener
 {
 public:
-
+	using shared = std::shared_ptr<DataChannel>;
+	
+	class Listener
+	{
+	public:
+		virtual ~Listener() = default;
+		virtual void OnOpen(const datachannels::DataChannel::shared& dataChannel) = 0;
+		virtual void OnClosed(const datachannels::DataChannel::shared& dataChannel) = 0;
+	};
+	
 	struct Options
 	{
 		std::string label;
 	};
 
-	using shared = std::shared_ptr<DataChannel>;
 public:
 	virtual ~DataChannel() = default;
 	virtual bool Send(datachannels::MessageType type, const uint8_t* data = nullptr, const uint64_t size = 0)  = 0;
 	virtual bool Close() = 0;
+	
+	virtual void SetListener(const std::shared_ptr<datachannels::DataChannel::Listener>& listener) = 0;
+	virtual std::string GetLabel() const = 0;
 };
 
 class OnTransportDataPendingListener

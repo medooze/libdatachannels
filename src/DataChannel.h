@@ -14,9 +14,7 @@ namespace datachannels
 namespace impl
 {
 class DataChannel : public datachannels::DataChannel, 
-		public sctp::Stream::Listener, 
-		public datachannels::MessageProducer, 
-		public datachannels::MessageListener,
+		public sctp::Stream::Listener,
 		public std::enable_shared_from_this<DataChannel>
 {
 public:
@@ -34,14 +32,6 @@ public:
 		DATA_CHANNEL_PARTIAL_RELIABLE_TIMED_UNORDERED	= 0x82
 	};
 	
-	class Listener
-	{
-	public:
-		virtual ~Listener() = default;
-		virtual void OnOpen(const datachannels::DataChannel::shared& dataChannel) = 0;
-		virtual void OnClosed(const datachannels::DataChannel::shared& dataChannel) = 0;
-	};
-	
 	DataChannel(const sctp::Stream::shared& stream);
 	DataChannel(sctp::Association& association, uint16_t id);
 	
@@ -49,6 +39,8 @@ public:
 	
 	virtual bool Send(datachannels::MessageType type, const uint8_t* data, const uint64_t size) override;
 	virtual bool Close() override;
+	virtual void SetListener(const std::shared_ptr<datachannels::DataChannel::Listener> & listener) override;
+	virtual std::string GetLabel() const override;
 	
 	// sctp::Stream::Listener
 	virtual void OnPayload(std::shared_ptr<datachannels::Message> payload) override;
@@ -60,8 +52,6 @@ public:
 	virtual void RemoveMessageListener(const std::shared_ptr<MessageListener>& listener) override;
 	
 	void Open();
-	
-	void SetListener(Listener* listener);
 private:
 	enum class State
 	{
@@ -77,7 +67,7 @@ private:
 	State state = State::Unestablished;
 
 	sctp::Stream::shared stream;
-	Listener* listener = nullptr;
+	std::shared_ptr<datachannels::DataChannel::Listener> listener = nullptr;
 	
 	datachannels::TimeService& timeService;
 	
