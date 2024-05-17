@@ -134,6 +134,8 @@ std::shared_ptr<Endpoint> EndpointManager::AddEndpoint(const Endpoint::Options& 
 		return nullptr;
 	}
 	
+	endpoint->SetListener(this);
+	
 	return endpoint;
 }
 

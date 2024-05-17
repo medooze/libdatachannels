@@ -14,8 +14,9 @@ std::random_device rd;
 std::mt19937 gen{rd()};
 std::uniform_int_distribution<unsigned long> dis{1, 4294967295};
 
-Association::Association(datachannels::TimeService& timeService, datachannels::OnTransportDataPendingListener &dataPendingListener) :
+Association::Association(datachannels::TimeService& timeService, Listener& listener, datachannels::OnTransportDataPendingListener &dataPendingListener) :
 	timeService(timeService),
+	listener(listener),
 	dataPendingListener(dataPendingListener),
 	closedState(*this),
 	cookieWaitState(*this),
@@ -206,14 +207,13 @@ void Association::Enqueue(const std::vector<Chunk::shared>& chunkBundle)
 
 void Association::OnDataReceived(uint16_t streamId, std::shared_ptr<datachannels::Message> data)
 {
+	Debug("Association::OnDataReceived: streamId: %d\n", streamId);
+	
 	if (streams.find(streamId) == streams.end())
 	{
 		streams[streamId] = std::make_shared<Stream>(*this, streamId);
 		// OnStreamCreated
-		if (listener)
-		{
-			listener->OnStreamCreated(streams[streamId]);
-		}
+		listener.OnStreamCreated(streams[streamId]);
 	}
 	
 	streams[streamId]->Recv(data);
@@ -241,10 +241,7 @@ Stream::shared Association::createStream(uint16_t streamId)
 	{
 		streams[streamId] = std::make_shared<Stream>(*this, streamId);
 		// OnStreamCreated
-		if (listener)
-		{
-			listener->OnStreamCreated(streams[streamId]);
-		}
+		listener.OnStreamCreated(streams[streamId]);
 	}
 	
 	return streams[streamId];

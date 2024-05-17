@@ -36,7 +36,7 @@ public:
 		virtual void OnClosed(Association* association) = 0;
 	};
 
-	Association(datachannels::TimeService& timeService, datachannels::OnTransportDataPendingListener& dataPendingListener);
+	Association(datachannels::TimeService& timeService, Listener& listener, datachannels::OnTransportDataPendingListener& dataPendingListener);
 	virtual ~Association();
 	
 	bool Associate();
@@ -54,17 +54,12 @@ public:
 	
 	void NotifyEstablished()
 	{
-		if (this->listener != nullptr) this->listener->OnEstablished(this);
+		listener.OnEstablished(this);
 	}
 	
 	void NotifyClosed()
 	{
-		if (this->listener != nullptr) this->listener->OnClosed(this);
-	}
-	
-	inline void SetListener(Listener* listener)
-	{
-		this->listener = listener;
+		listener.OnClosed(this);
 	}
 	
 	inline datachannels::TimeService& GetTimeService()
@@ -121,9 +116,8 @@ private:
 
 	std::map<uint16_t,Stream::shared> streams;
 	
+	Listener& listener;
 	datachannels::OnTransportDataPendingListener& dataPendingListener;
-	
-	Listener* listener = nullptr;
 	
 	ClosedState closedState;
 	CookieWaitState cookieWaitState;

@@ -93,6 +93,14 @@ void DataChannel::OnPayload(std::shared_ptr<datachannels::Message> payload)
 	}
 	else if (state == State::Established)
 	{
+		if (payload->type == MessageType::WebRTCString)
+		{
+			std::string str;
+			str.assign((char*)payload->data.data(), payload->data.size());
+			
+			Debug("-Data message: %s\n", str.c_str());
+		}
+		
 		for (auto& listener : messageListeners)
 		{
 			listener->OnMessage(payload);

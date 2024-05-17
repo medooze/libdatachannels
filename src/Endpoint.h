@@ -25,7 +25,7 @@ public:
 		virtual void OnDataChannelCreated(const datachannels::DataChannel::shared& dataChannel) = 0;
 	};
 
-	Endpoint(TimeService& timeService, datachannels::OnTransportDataPendingListener& listener);
+	Endpoint(TimeService& timeService, datachannels::OnTransportDataPendingListener& dataPendingListener);
 	virtual ~Endpoint();
 	
 	virtual bool Init(const Options& options)  override;
@@ -59,13 +59,13 @@ public:
 private:
 	uint16_t allocateStreamId();
 	
-	datachannels::Endpoint::Mode mode;
+	datachannels::Endpoint::Mode mode = datachannels::Endpoint::Mode::Server;
 	sctp::Association association;
 	std::string identifier;
 	
 	std::map<uint16_t, std::shared_ptr<DataChannel>> dataChannels;
 	
-	Listener* listener;
+	Listener* listener = nullptr;
 };
 
 }; //namespace impl

@@ -8,9 +8,8 @@ namespace impl
 {
 
 Endpoint::Endpoint(datachannels::TimeService& timeService, datachannels::OnTransportDataPendingListener& listener) :
-	association(timeService, listener)
+	association(timeService, *this, listener)
 {
-	
 }
 
 Endpoint::~Endpoint()
@@ -82,7 +81,7 @@ const std::map<uint16_t, std::shared_ptr<DataChannel>>& Endpoint::GetDataChannel
 
 void Endpoint::OnStreamCreated(const sctp::Stream::shared& stream)
 {
-	Debug("DataChannelFactory::OnStreamCreated: %d\n", stream->GetId());
+	Debug("Endpoint::OnStreamCreated: %d\n", stream->GetId());
 	
 	auto channel = std::make_shared<DataChannel>(stream);
 	dataChannels[stream->GetId()] = channel;
