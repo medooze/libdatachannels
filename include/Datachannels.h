@@ -78,7 +78,7 @@ public:
 	virtual bool Send(datachannels::MessageType type, const uint8_t* data = nullptr, const uint64_t size = 0)  = 0;
 	virtual bool Close() = 0;
 	
-	virtual void SetListener(const std::shared_ptr<datachannels::DataChannel::Listener>& listener) = 0;
+	virtual void SetListener(datachannels::DataChannel::Listener* listener) = 0;
 	virtual std::string GetLabel() const = 0;
 };
 

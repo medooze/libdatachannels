@@ -39,7 +39,7 @@ public:
 	
 	virtual bool Send(datachannels::MessageType type, const uint8_t* data, const uint64_t size) override;
 	virtual bool Close() override;
-	virtual void SetListener(const std::shared_ptr<datachannels::DataChannel::Listener> & listener) override;
+	virtual void SetListener(datachannels::DataChannel::Listener* listener) override;
 	virtual std::string GetLabel() const override;
 	
 	// sctp::Stream::Listener
@@ -67,7 +67,7 @@ private:
 	State state = State::Unestablished;
 
 	sctp::Stream::shared stream;
-	std::shared_ptr<datachannels::DataChannel::Listener> listener = nullptr;
+	datachannels::DataChannel::Listener* listener = nullptr;
 	
 	datachannels::TimeService& timeService;
 	

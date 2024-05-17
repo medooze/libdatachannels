@@ -165,7 +165,7 @@ void DataChannel::RemoveMessageListener(const std::shared_ptr<MessageListener>& 
 	});
 }
 
-void DataChannel::SetListener(const std::shared_ptr<datachannels::DataChannel::Listener> & listener)
+void DataChannel::SetListener(datachannels::DataChannel::Listener* listener)
 {
 	timeService.Sync([this, listener](...) {
 		this->listener = listener;	
