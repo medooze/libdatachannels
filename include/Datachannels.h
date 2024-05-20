@@ -81,6 +81,7 @@ public:
 	virtual void SetListener(datachannels::DataChannel::Listener* listener) = 0;
 	virtual std::string GetLabel() const = 0;
 	virtual bool IsOpen() const = 0;
+	virtual Ports GetPorts() const = 0;
 };
 
 class OnTransportDataPendingListener

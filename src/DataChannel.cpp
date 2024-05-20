@@ -217,6 +217,11 @@ bool DataChannel::ParseOpenMessage(BufferReader& reader)
 	return true;
 }
 
+Ports DataChannel::GetPorts() const
+{
+	return {stream->getAssociation().GetLocalPort(), stream->getAssociation().GetRemotePort()};
+}
+
 void DataChannel::Dump() const
 {
 	Debug("Data channel Info:\n");

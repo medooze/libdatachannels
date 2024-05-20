@@ -141,6 +141,16 @@ void EndpointManager::OnDataChannelCreated(const datachannels::DataChannel::shar
 	onDataChannelCreatedListener.OnDataChannelCreated(dataChannel);
 }
 
+std::optional<std::string> EndpointManager::GetEndpointIdentifier(datachannels::DataChannel& dataChannel) const
+{
+	auto ports = dataChannel.GetPorts();
+	
+	if (cachedEndpoints.find(ports) != cachedEndpoints.end())
+		return cachedEndpoints.at(ports)->GetIdentifier();
+		
+	return std::nullopt;
+}
+
 std::shared_ptr<Endpoint> EndpointManager::AddEndpoint(const Endpoint::Options& options)
 {
 	auto endpoint = std::make_shared<Endpoint>(timeService, onTransportDataPendingListener);

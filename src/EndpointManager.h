@@ -36,7 +36,7 @@ public:
 
 	inline Transport& GetTransport() { return *this; }
 	void SetEndpointMode(Endpoint::Mode mode);
-	void CreateDataChannel(const std::string& label, const std::string& endpointIdentifier = "");
+	datachannels::DataChannel::shared CreateDataChannel(const std::string& label, const std::string& endpointIdentifier = "");
 	void Close();
 	
 	std::vector<std::shared_ptr<datachannels::DataChannel>> GetDataChannels() const;
@@ -50,6 +50,8 @@ public:
 	virtual void OnAssociationClosed(const Endpoint::shared& endpoint) override;
 	virtual void OnDataChannelCreated(const datachannels::DataChannel::shared& dataChannel) override;
 	
+	std::optional<std::string> GetEndpointIdentifier(datachannels::DataChannel& dataChannel) const;
+	
 private:
 	std::shared_ptr<Endpoint> AddEndpoint(const Endpoint::Options& options);
 	std::optional<Ports> AllocateEndpointPort();
@@ -59,7 +61,7 @@ private:
 	
 	std::unordered_map<Ports, std::shared_ptr<Endpoint>, PortsHash, PortsComp> cachedEndpoints;
 	std::unordered_map<std::string, std::shared_ptr<Endpoint>> establishedEndpoints;
-	std::list<std::pair<std::string, std::string>> pendingDataChannelCreation;
+	std::unordered_map<std::string, std::vector<datachannels::DataChannel>> pendingDataChannelCreation;
 	
 	datachannels::OnTransportDataPendingListener& onTransportDataPendingListener;
 	datachannels::OnDataChannelCreatedListener& onDataChannelCreatedListener;
