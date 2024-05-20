@@ -52,6 +52,11 @@ public:
 	virtual void RemoveMessageListener(const std::shared_ptr<MessageListener>& listener) override;
 	
 	void Open();
+	
+	inline bool IsOpen() const
+	{
+		return state == State::Established;
+	}
 private:
 	enum class State
 	{

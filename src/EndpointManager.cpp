@@ -56,6 +56,24 @@ void EndpointManager::Close()
 		});
 }
 
+std::vector<std::shared_ptr<datachannels::DataChannel>> EndpointManager::GetDataChannels() const
+{
+	std::vector<std::shared_ptr<datachannels::DataChannel>> dataChannels;
+	
+	std::for_each(establishedEndpoints.begin(), establishedEndpoints.end(), 
+		[&dataChannels](auto& p) { 
+			auto dcs = p.second->GetDataChannels();
+			
+			std::for_each(dcs.begin(), dcs.end(), [&dataChannels](auto& p)
+			{
+				if (p.second->IsOpen()) dataChannels.push_back(p.second);
+			});
+			
+		});
+	
+	return dataChannels;
+}
+
 size_t EndpointManager::ReadPacket(uint8_t *data, uint32_t size)
 {
 	// @todo Priority chunks are put first. Now it always read the front endpoint

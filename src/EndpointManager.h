@@ -39,6 +39,8 @@ public:
 	void CreateDataChannel(const std::string& label, const std::string& endpointIdentifier = "");
 	void Close();
 	
+	std::vector<std::shared_ptr<datachannels::DataChannel>> GetDataChannels() const;
+	
 	// datachannels::Transport overrides
 	size_t ReadPacket(uint8_t *data, uint32_t size) override;
 	size_t WritePacket(uint8_t *data, uint32_t size) override;
