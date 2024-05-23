@@ -32,14 +32,14 @@ class EndpointManager : public datachannels::Transport, public Endpoint::Listene
 public:
 	EndpointManager(TimeService& timeService, 
 		datachannels::OnTransportDataPendingListener& onTransportDataPendingListener, 
-		datachannels::OnDataChannelCreatedListener& onDataChannelCreatedListener);
+		datachannels::OnDataChannelLifecycleListener& onDataChannelLifecycleListener);
 
 	inline Transport& GetTransport() { return *this; }
 	void SetEndpointMode(Endpoint::Mode mode);
-	datachannels::DataChannel::shared CreateDataChannel(const std::string& label, const std::string& endpointIdentifier = "");
+	void CreateDataChannel(const std::string& label, const std::string& endpointIdentifier = "");
 	void Close();
 	
-	std::vector<std::shared_ptr<datachannels::DataChannel>> GetDataChannels() const;
+	std::unordered_map<std::string, std::vector<datachannels::DataChannel::shared>> GetDataChannels() const;
 	
 	// datachannels::Transport overrides
 	size_t ReadPacket(uint8_t *data, uint32_t size) override;
@@ -48,7 +48,8 @@ public:
 	// Endpoint::Listener overrides
 	virtual void OnAssociationEstablished(const Endpoint::shared& endpoint) override;
 	virtual void OnAssociationClosed(const Endpoint::shared& endpoint) override;
-	virtual void OnDataChannelCreated(const datachannels::DataChannel::shared& dataChannel) override;
+	virtual void OnDataChannelOpen(const std::string& endpoingIdentifier, const datachannels::DataChannel::shared& dataChannel) override;
+	virtual void OnDataChannelClose(const std::string& endpoingIdentifier, const datachannels::DataChannel::shared& dataChannel) override;
 	
 	std::optional<std::string> GetEndpointIdentifier(datachannels::DataChannel& dataChannel) const;
 	
@@ -61,10 +62,11 @@ private:
 	
 	std::unordered_map<Ports, std::shared_ptr<Endpoint>, PortsHash, PortsComp> cachedEndpoints;
 	std::unordered_map<std::string, std::shared_ptr<Endpoint>> establishedEndpoints;
-	std::unordered_map<std::string, std::vector<datachannels::DataChannel>> pendingDataChannelCreation;
+	//std::unordered_map<std::string, std::vector<datachannels::DataChannel>> pendingDataChannelCreation;
+	std::list<std::pair<std::string, std::string>> pendingDataChannelCreation;
 	
 	datachannels::OnTransportDataPendingListener& onTransportDataPendingListener;
-	datachannels::OnDataChannelCreatedListener& onDataChannelCreatedListener;
+	datachannels::OnDataChannelLifecycleListener& onDataChannelLifecycleListener;
 	
 	uint16_t nextPort = 5000;
 };

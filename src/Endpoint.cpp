@@ -47,8 +47,6 @@ DataChannel::shared Endpoint::CreateDataChannel(const DataChannel::Options& opti
 	
 	dataChannels[id] = channel;
 	
-	if (listener != nullptr) listener->OnDataChannelCreated(channel);
-	
 	return channel;
 }
 
@@ -86,7 +84,7 @@ void Endpoint::OnStreamCreated(const sctp::Stream::shared& stream)
 	auto channel = std::make_shared<DataChannel>(stream);
 	dataChannels[stream->GetId()] = channel;
 	
-	if (listener != nullptr) listener->OnDataChannelCreated(channel);
+	channel->SetListener(this);
 }
 
 void Endpoint::OnEstablished(sctp::Association* association)
@@ -97,6 +95,16 @@ void Endpoint::OnEstablished(sctp::Association* association)
 void Endpoint::OnClosed(sctp::Association* association)
 {
 	if (listener != nullptr) listener->OnAssociationClosed(shared_from_this());
+}
+
+void Endpoint::OnOpen(const datachannels::DataChannel::shared& dataChannel)
+{
+	if (listener != nullptr) listener->OnDataChannelOpen(identifier, dataChannel);
+}
+
+void Endpoint::OnClosed(const datachannels::DataChannel::shared& dataChannel)
+{
+	if (listener != nullptr) listener->OnDataChannelClose(identifier, dataChannel);
 }
 
 uint16_t Endpoint::allocateStreamId()

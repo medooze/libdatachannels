@@ -11,7 +11,8 @@ namespace impl
 
 class Endpoint : public datachannels::Endpoint,
 		public sctp::Association::Listener,
-		public std::enable_shared_from_this<Endpoint>
+		public std::enable_shared_from_this<Endpoint>,
+		public datachannels::DataChannel::Listener
 {
 public:
 	using shared = std::shared_ptr<Endpoint>;
@@ -22,7 +23,8 @@ public:
 		virtual void OnAssociationEstablished(const Endpoint::shared& endpoint) = 0;
 		virtual void OnAssociationClosed(const Endpoint::shared& endpoint) = 0;
 		
-		virtual void OnDataChannelCreated(const datachannels::DataChannel::shared& dataChannel) = 0;
+		virtual void OnDataChannelOpen(const std::string& endpointIdentifier, const datachannels::DataChannel::shared& dataChannel) = 0;
+		virtual void OnDataChannelClose(const std::string& endpointIdentifier, const datachannels::DataChannel::shared& dataChannel) = 0;
 	};
 
 	Endpoint(TimeService& timeService, datachannels::OnTransportDataPendingListener& dataPendingListener);
@@ -55,6 +57,9 @@ public:
 	{
 		return identifier;
 	}
+	
+	virtual void OnOpen(const datachannels::DataChannel::shared& dataChannel) override;
+	virtual void OnClosed(const datachannels::DataChannel::shared& dataChannel) override;
 	
 private:
 	uint16_t allocateStreamId();

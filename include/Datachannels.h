@@ -81,7 +81,7 @@ public:
 	virtual void SetListener(datachannels::DataChannel::Listener* listener) = 0;
 	virtual std::string GetLabel() const = 0;
 	virtual bool IsOpen() const = 0;
-	virtual Ports GetPorts() const = 0;
+	virtual uint16_t GetId() const = 0;
 };
 
 class OnTransportDataPendingListener
@@ -91,11 +91,12 @@ public:
 	virtual void OnTransportDataPending() = 0;
 };
 
-class OnDataChannelCreatedListener
+class OnDataChannelLifecycleListener
 {
 public:
-	virtual ~OnDataChannelCreatedListener() = default;
-	virtual void OnDataChannelCreated(const datachannels::DataChannel::shared& dataChannel) = 0;
+	virtual ~OnDataChannelLifecycleListener() = default;
+	virtual void OnDataChannelOpen(const std::string& endpointIdentifier, const datachannels::DataChannel::shared& dataChannel) = 0;
+	virtual void OnDataChannelClose(const std::string& endpointIdentifier, const datachannels::DataChannel::shared& dataChannel) = 0;
 };
 
 class Transport

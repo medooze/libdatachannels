@@ -58,7 +58,7 @@ public:
 		return state == State::Established;
 	}
 	
-	Ports GetPorts() const override;
+	virtual uint16_t GetId() const override;
 	
 private:
 	enum class State

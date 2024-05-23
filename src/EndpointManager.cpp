@@ -8,10 +8,10 @@ namespace datachannels::impl
 {
 	
 EndpointManager::EndpointManager(TimeService& timeService, datachannels::OnTransportDataPendingListener& onTransportDataPendingListener, 
-		datachannels::OnDataChannelCreatedListener& onDataChannelCreatedListener) : 
+		datachannels::OnDataChannelLifecycleListener& onDataChannelLifecycleListener) : 
 	timeService(timeService), 
 	onTransportDataPendingListener(onTransportDataPendingListener),
-	onDataChannelCreatedListener(onDataChannelCreatedListener)
+	onDataChannelLifecycleListener(onDataChannelLifecycleListener)
 {
 };
 
@@ -56,17 +56,21 @@ void EndpointManager::Close()
 		});
 }
 
-std::vector<std::shared_ptr<datachannels::DataChannel>> EndpointManager::GetDataChannels() const
+std::unordered_map<std::string, std::vector<datachannels::DataChannel::shared>> EndpointManager::GetDataChannels() const
 {
-	std::vector<std::shared_ptr<datachannels::DataChannel>> dataChannels;
+	std::unordered_map<std::string, std::vector<datachannels::DataChannel::shared>> dataChannels;
 	
 	std::for_each(establishedEndpoints.begin(), establishedEndpoints.end(), 
 		[&dataChannels](auto& p) { 
 			auto dcs = p.second->GetDataChannels();
+			auto id = p.first;
 			
-			std::for_each(dcs.begin(), dcs.end(), [&dataChannels](auto& p)
+			std::for_each(dcs.begin(), dcs.end(), [id, &dataChannels](auto& p)
 			{
-				if (p.second->IsOpen()) dataChannels.push_back(p.second);
+				if (p.second->IsOpen())
+				{
+					dataChannels[id].push_back(p.second);
+				}
 			});
 			
 		});
@@ -136,17 +140,22 @@ void EndpointManager::OnAssociationClosed(const Endpoint::shared& endpoint)
 	cachedEndpoints.erase(Ports{endpoint->GetLocalPort(), endpoint->GetRemotePort()});
 }
 
-void EndpointManager::OnDataChannelCreated(const datachannels::DataChannel::shared& dataChannel)
+void EndpointManager::OnDataChannelOpen(const std::string& endpoingIdentifier, const datachannels::DataChannel::shared& dataChannel)
 {
-	onDataChannelCreatedListener.OnDataChannelCreated(dataChannel);
+	onDataChannelLifecycleListener.OnDataChannelOpen(endpoingIdentifier, dataChannel);
+}
+
+void EndpointManager::OnDataChannelClose(const std::string& endpoingIdentifier, const datachannels::DataChannel::shared& dataChannel)
+{
+	onDataChannelLifecycleListener.OnDataChannelClose(endpoingIdentifier, dataChannel);
 }
 
 std::optional<std::string> EndpointManager::GetEndpointIdentifier(datachannels::DataChannel& dataChannel) const
 {
-	auto ports = dataChannel.GetPorts();
+	// auto ports = dataChannel.GetPorts();
 	
-	if (cachedEndpoints.find(ports) != cachedEndpoints.end())
-		return cachedEndpoints.at(ports)->GetIdentifier();
+	// if (cachedEndpoints.find(ports) != cachedEndpoints.end())
+	// 	return cachedEndpoints.at(ports)->GetIdentifier();
 		
 	return std::nullopt;
 }
