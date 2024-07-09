@@ -152,6 +152,8 @@ public:
 		return pos;
 	}
 
+	uint8_t* Consume(size_t num)		{ uint8_t* consumed = data + pos; pos += num; return consumed;	}
+
 	bool   Assert(size_t num) const 	{ return pos+num<=size;	}
 	void   GoTo(size_t mark) 		{ pos = mark;		}
 	size_t Skip(size_t num) 		{ size_t mark = pos; pos += num; return mark;	}
@@ -160,6 +162,7 @@ public:
 	size_t GetLength() const 		{ return pos;		}
 	size_t GetLeft() const 			{ return size-pos;	}
 	size_t GetSize() const 			{ return size;		}
+	const uint8_t* GetData() const 		{ return data;		}
 	
 private:
 	uint8_t* data;
