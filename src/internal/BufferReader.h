@@ -96,6 +96,7 @@ public:
 	inline uint32_t Peek4()				{ return Get4(pos); }
 	inline uint64_t Peek8()				{ return Get8(pos); }
 	inline const uint8_t* PeekData()		{ return data+pos;  }
+	inline const uint8_t* PeekData(size_t num)	{ return data+num; }
 	size_t   PadTo(size_t num)
 	{
 		size_t reminder = pos % num;
