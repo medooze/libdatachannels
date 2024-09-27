@@ -23,7 +23,7 @@ public:
 	virtual uint16_t GetRemotePort() const override;
 	virtual datachannels::Transport& GetTransport() override;
 private:
-	sctp::Association association;
+	std::shared_ptr<sctp::Association> association;
 };
 
 }; //namespace impl
