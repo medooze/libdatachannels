@@ -15,7 +15,7 @@ std::mt19937 gen{rd()};
 std::uniform_int_distribution<unsigned long> dis{1, 4294967295};
 
 Association::Association(datachannels::TimeService& timeService) :
-	timeService(timeService)
+	TimeServiceWrapper<Association>(timeService)
 {
 }
 
@@ -98,7 +98,7 @@ bool Association::Associate()
 	init->supportedExtensions.push_back(Chunk::Type::RE_CONFIG);
 		
 	//Set timer
-	initTimer = timeService.CreateTimer(InitRetransmitTimeout,[=](...){
+	initTimer = CreateTimerSafe(InitRetransmitTimeout,[=](...){
 		//Retransmit init chunk
 		if (initRetransmissions++<MaxInitRetransmits)
 		{
@@ -190,7 +190,7 @@ size_t Association::WritePacket(uint8_t *data, uint32_t size)
 			Acknowledge();
 		else
 			//Schedule timer
-			sackTimer = timeService.CreateTimer(pendingAcknowledgeTimeout,[this](...){
+			sackTimer = CreateTimerSafe(pendingAcknowledgeTimeout,[this](...){
 				//In the future
 				Acknowledge();
 			});
@@ -398,7 +398,7 @@ void Association::Process(const Chunk::shared& chunk)
 					initRetransmissions = 0;
 					
 					//Set timer
-					cookieEchoTimer = timeService.CreateTimer(100ms,[=](...){
+					cookieEchoTimer = CreateTimerSafe(100ms,[=](...){
 						//3)  If the T1-cookie timer expires, the endpoint MUST retransmit
 						//    COOKIE ECHO and restart the T1-cookie timer without changing
 						//    state.  This MUST be repeated up to 'Max.Init.Retransmits' times.

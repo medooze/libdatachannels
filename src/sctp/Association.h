@@ -16,7 +16,7 @@ using namespace std::chrono_literals;
 namespace sctp
 {
 	
-class Association : public datachannels::Transport
+class Association : public datachannels::Transport, public TimeServiceWrapper<Association>
 {
 private:
 	using TransmissionSequenceNumberWrapper = SequenceNumberWrapper<uint32_t>;
@@ -34,8 +34,12 @@ public:
 		ShutDown,
 		ShutDownAckSent
 	};
-public:
+private:
+	// Private constructor to prevent creating without TimeServiceWrapper::Create() factory
+	friend class TimeServiceWrapper<Association>;
 	Association(datachannels::TimeService& timeService);
+
+public:
 	virtual ~Association();
 	
 	bool Associate();
@@ -81,7 +85,6 @@ private:
 private:
 	State state = State::Closed;
 	std::list<Chunk::shared> queue;
-	datachannels::TimeService& timeService;
 	
 	uint16_t localPort = 0;
 	uint16_t remotePort = 0;
